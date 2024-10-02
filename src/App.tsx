@@ -132,14 +132,19 @@ export default function App() {
           </Select.Portal>
         </Select.Root> */}
         <div className="grow"/>
+        {runId ? (
+          <Toolbar.Button className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 whitespace-nowrap flex items-center" onClick={handleStop}>
+            <Square className="h-4 w-4 mr-2" />
+            Stop
+          </Toolbar.Button>
+        ) : (
         <Toolbar.Button className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 mr-2 whitespace-nowrap flex items-center" onClick={handleRun}>
           <Play className="h-4 w-4 mr-2" />
           Run
         </Toolbar.Button>
-        <Toolbar.Button className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 whitespace-nowrap flex items-center" onClick={handleStop}>
-          <Square className="h-4 w-4 mr-2" />
-          Stop
-        </Toolbar.Button>
+        )}
+        <div className="grow"/>
+
       </Toolbar.Root>
 
       <CodeEditor
