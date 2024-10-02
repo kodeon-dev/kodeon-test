@@ -1,6 +1,6 @@
 "use client";
 
-import CodeMirror, { BasicSetupOptions } from "@uiw/react-codemirror";
+import CodeMirror, { EditorView, BasicSetupOptions } from "@uiw/react-codemirror";
 import { tokyoNightStormInit } from "@uiw/codemirror-theme-tokyo-night-storm";
 import { python } from '@codemirror/lang-python';
 
@@ -64,7 +64,7 @@ export function CodeEditor(props: CodeEditorProps) {
             theme={theme}
             onChange={(value) => props.onValueUpdated(value)}
             autoFocus={true}
-            extensions={[python()]}
+            extensions={[EditorView.lineWrapping, python()]}
             placeholder="Type some code here!"
             basicSetup={options}
             lang="python"
