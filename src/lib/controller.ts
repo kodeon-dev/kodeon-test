@@ -1,8 +1,8 @@
 import assert from 'http-assert-plus';
 
-import PythonWorker from '../web-workers/python?worker'
-import { writeMessage } from '../lib/service-messages';
-import type { EventStatus, WorkerRequestEvent, WorkerResponseEvent } from './types'
+import PythonWorker from '@/web-workers/python?worker'
+import { writeMessage } from '@/lib/service-messages';
+import type { EventStatus, WorkerRequestEvent, WorkerResponseEvent } from '@/lib/types'
 
 type Engine = 'PYTHON';
 const workers = new Map<string, Worker>()

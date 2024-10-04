@@ -1,8 +1,8 @@
 import assert from 'http-assert-plus';
 import { loadPyodide, type PyodideInterface } from 'pyodide';
 
-import { readMessage } from '../lib/service-messages';
-import type { WorkerRequestEvent, WorkerResponseEvent } from '../lib/types';
+import { readMessage } from '@/lib/service-messages';
+import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/types';
 
 declare const self: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
