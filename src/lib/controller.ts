@@ -62,7 +62,9 @@ export async function startCodeTask({ id, engine, code, status, stdin, stdout, s
 
       case 'STDIN': {
         const { prompt } = event.data;
-        stdin(prompt, (input: string) => writeMessage(id, input).catch(err => console.error(err)));
+        stdin(prompt, (input: string) => {
+          writeMessage(id, input).catch(err => console.error('writeMessage', err));
+        });
         break;
       }
 

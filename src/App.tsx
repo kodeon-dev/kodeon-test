@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 // import * as Select from '@radix-ui/react-select';
 import * as Toolbar from '@radix-ui/react-toolbar';
@@ -21,8 +23,6 @@ export default function App() {
   const [output, setOutput] = useState<RunCodeOutput[]>([])
   const [codeResult, setCodeResult] = useState<string | undefined>()
   const [codeErr, setCodeErr] = useState<string | undefined>()
-
-  const [testCountBack, setCountBack] = useState(1024)
 
   // const supportsServiceWorkers = 'serviceWorker' in navigator
   // console.log('supportsServiceWorkers', supportsServiceWorkers)
@@ -49,26 +49,26 @@ export default function App() {
         status(status, message) {
           switch (status) {
             case 'STARTED': {
-              pushOutput({ type: 'STATUS', key: status, label: '🟡 Starting...', msg: message });
+              pushOutput({ type: 'STATUS', key: status, label: 'Starting...', msg: message });
               break;
             }
             case 'DEPENDENCIES': {
-              pushOutput({ type: 'STATUS', key: status, label: '🟠 Loading dependencies...', msg: message });
+              pushOutput({ type: 'STATUS', key: status, label: 'Loading dependencies...', msg: message });
               break;
             }
             case 'RUNNING': {
-              pushOutput({ type: 'STATUS', key: status, label: '🔵 Running...', msg: message });
+              pushOutput({ type: 'STATUS', key: status, label: 'Running...', msg: message });
               break;
             }
             case 'COMPLETED': {
-              pushOutput({ type: 'STATUS', key: status, label: '🟢 Completed!' });
+              pushOutput({ type: 'STATUS', key: status, label: 'Completed!' });
               if (message) {
                 setCodeResult(message)
               }
               break;
             }
             case 'CRASHED': {
-              pushOutput({ type: 'STATUS', key: status, label: '🔴 Crashed!' });
+              pushOutput({ type: 'STATUS', key: status, label: 'Crashed!' });
               if (message) {
                 setCodeErr(message)
               }
@@ -77,14 +77,7 @@ export default function App() {
           }
         },
         stdin(prompt, write) {
-          if (prompt) {
-            pushOutput({ type: 'STDOUT', msg: prompt })
-
-            setTimeout(() => {
-              write(testCountBack.toString())
-              setCountBack(testCountBack + 1)
-            }, 1000)
-          }
+          pushOutput({ type: 'STDIN', prompt, write })
         },
         stdout(data) {
           pushOutput({ type: 'STDOUT', msg: data })
@@ -97,7 +90,7 @@ export default function App() {
       if (typeof err.message === 'string') {
         setCodeErr(err.message)
       }
-      pushOutput({ type: 'STATUS', key: 'CRASHED', label: '🔴 Crashed!' });
+      pushOutput({ type: 'STATUS', key: 'CRASHED', label: 'Crashed!' });
     } finally {
       setRunId(undefined);
     }
@@ -106,7 +99,7 @@ export default function App() {
   async function handleStop() {
     if (typeof runId === 'string') {
       console.log('Trigger cancel event');
-      setOutput(output.concat({ type: 'STATUS', key: 'STOPPED', label: '🛑 Stopped' }));
+      setOutput(output.concat({ type: 'STATUS', key: 'STOPPED', label: 'Stopped!' }));
       stopCodeTask('PYTHON', runId);
     }
   }
@@ -166,6 +159,7 @@ export default function App() {
         value={code}
         onValueUpdated={setCode}
         output={output}
+        // onStdinSend={codeStdinCallback}
         result={codeResult}
         err={codeErr}
       />

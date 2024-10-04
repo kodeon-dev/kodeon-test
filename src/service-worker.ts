@@ -5,13 +5,14 @@ declare const self: ServiceWorkerGlobalScope;
 const messages = new Map<string, string>();
 
 self.addEventListener('install', (/* event */) => {
-  console.log('Service Worker: Installed');
-  // Perform install steps, like caching resources if needed.
+  // console.log('Service Worker: Installed');
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (/* event */) => {
-  console.log('Service Worker: Activated');
+self.addEventListener('activate', (event) => {
+  // console.log('Service Worker: Activated');
   // Cleanup or initialization work when the service worker takes control.
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', async (event) => {
@@ -31,9 +32,8 @@ function assert(value: unknown, err: Error): asserts value {
 async function handlePostRequest(request: Request): Promise<Response> {
   try {
     if (request.url.endsWith('/read')) {
-      const { messageId, timeout } = await request.json();
+      const { messageId } = await request.json();
       assert(typeof messageId === 'string', new TypeError('Expected messageId to be a string'));
-      assert(typeof timeout === 'number', new TypeError('Expected timeout to be a number'));
 
       let res: Response;
 
@@ -71,7 +71,7 @@ async function handlePostRequest(request: Request): Promise<Response> {
     } else if (request.url.endsWith('/write')) {
       const { messageId, value } = await request.json();
       assert(typeof messageId === 'string', new TypeError('Expected messageId to be a string'));
-      assert(typeof value === 'string', new TypeError('Expected timeout to be a number'));
+      assert(typeof value === 'string', new TypeError('Expected value to be a string'));
 
       messages.set(messageId, value)
 

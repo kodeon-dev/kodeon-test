@@ -8,14 +8,14 @@ import ms from 'ms';
 export function readMessage(messageId: string, timeout: string): string {
   function checkTextmail(): string | undefined {
     try {
-      console.log('readMessage REQ', messageId);
+      // console.log('readMessage REQ', messageId);
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/stdin/read', false);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.send(JSON.stringify({ messageId, timeout: ms(timeout) }));
 
-      console.log('readMessage RES', xhr.status, xhr.responseText)
+      // console.log('readMessage RES', xhr.status, xhr.responseText)
 
       switch (xhr.status) {
         case 200: {
@@ -23,10 +23,12 @@ export function readMessage(messageId: string, timeout: string): string {
           assert(typeof value === 'string', 'Missing value from successful stdin read')
           return value;
         }
+
         case 404: {
           // You have no new messages
           return undefined;
         }
+
         default: {
           const { error } = JSON.parse(xhr.responseText)
           if (typeof error === 'string') {
@@ -37,7 +39,7 @@ export function readMessage(messageId: string, timeout: string): string {
         }
       }
     } catch (err) {
-      console.error(err)
+      console.error('readMessage REQ', err)
       return undefined
     }
   }
@@ -64,17 +66,21 @@ export function readMessage(messageId: string, timeout: string): string {
 /**
  * Writes via ASYNCHRONOUS XMLHTTPREQUEST
  */
-export function writeMessage(messageId: string, value: string) {
-  console.log('writeMessage REQ', messageId, value);
+export async function writeMessage(messageId: string, value: string) {
+  // console.log('writeMessage REQ', messageId, value);
 
-  return new Promise<void>((resolve, reject) => {
+  if ('serviceWorker' in window.navigator) {
+    await window.navigator.serviceWorker.ready;
+  }
+
+  await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/stdin/write', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE) {
-        console.log('writeMessage RES', xhr.status, xhr.responseText)
+        // console.log('writeMessage RES', xhr.status, xhr.responseText)
 
         switch (xhr.status) {
           case 200: return resolve();
@@ -92,5 +98,5 @@ export function writeMessage(messageId: string, value: string) {
     };
 
     xhr.send(JSON.stringify({ messageId, value }));
-  })
+  });
 }

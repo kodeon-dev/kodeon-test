@@ -4,10 +4,12 @@ import CodeMirror, { EditorView, BasicSetupOptions } from "@uiw/react-codemirror
 import { tokyoNightStormInit } from "@uiw/codemirror-theme-tokyo-night-storm";
 import { python } from '@codemirror/lang-python';
 
+import { InputStdIn } from './input-stdin';
 import { classNames } from '../lib/utils';
 
 export type RunCodeOutput =
   | { type: 'STATUS', key: string, label: string, msg?: string }
+  | { type: 'STDIN', prompt?: string | undefined, write: (value: string) => void }
   | { type: 'STDOUT', msg: string }
   | { type: 'STDERR', msg: string }
 
@@ -15,6 +17,7 @@ export interface CodeEditorProps {
   value: string;
   onValueUpdated: (value: string) => void;
   output?: RunCodeOutput[];
+  onStdinSend?: (value: string) => void | undefined,
   result?: string;
   err?: string;
 }
@@ -88,6 +91,11 @@ export function CodeEditor(props: CodeEditorProps) {
                     )}
                   </code>
                 );
+              }
+
+              case 'STDIN': {
+                const { prompt, write } = line;
+                return <InputStdIn key={i} prompt={prompt} onSubmit={write}/>
               }
 
               case 'STDOUT': {
