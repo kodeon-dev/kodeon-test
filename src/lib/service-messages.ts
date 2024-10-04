@@ -69,8 +69,9 @@ export function readMessage(messageId: string, timeout: string): string {
 export async function writeMessage(messageId: string, value: string) {
   // console.log('writeMessage REQ', messageId, value);
 
-  if ('serviceWorker' in window.navigator) {
-    await window.navigator.serviceWorker.ready;
+  if ('serviceWorker' in global.navigator) {
+    // @ts-ignore
+    await global.navigator.serviceWorker.ready;
   }
 
   await new Promise<void>((resolve, reject) => {
