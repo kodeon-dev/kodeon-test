@@ -117,7 +117,6 @@ export function CodeEditor(props: CodeEditorProps) {
           )}
           {props.err && (
             <>
-              <span className="text-sm text-red-700">An error occurred:</span>
               <span className="text-red-700">{props.err}</span>
             </>
           )}
