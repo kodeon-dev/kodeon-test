@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// import * as Select from '@radix-ui/react-select';
-import * as Toolbar from '@radix-ui/react-toolbar';
-// import { Play, Square, ChevronDown, Check } from 'lucide-react';
-import { Play, Square } from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/components/ui/menubar"
+import { Code, Play, Square, /* Upload, Download */ } from "lucide-react"
 
 import { CodeEditor, type RunCodeOutput } from './components/editor';
 import { startCodeTask, stopWorker } from './lib/controller';
-import { pythonSample } from './samples';
+import { pythonSamples } from './samples';
 
 // const languages = [
 //   { value: 'javascript', label: 'JavaScript' },
@@ -17,7 +22,7 @@ import { pythonSample } from './samples';
 // ];
 
 export default function App() {
-  const [code, setCode] = useState(localStorage.getItem('last-edited') ?? pythonSample.trim())
+  const [code, setCode] = useState(localStorage.getItem('last-edited') ?? pythonSamples.Basic.trim())
   // const [lang, setLang] = useState('python')
   const [runId, setRunId] = useState<string | undefined>()
   const [output, setOutput] = useState<RunCodeOutput[]>([])
@@ -113,6 +118,14 @@ export default function App() {
     }
   }
 
+  function setSampleCode(code: string) {
+    setCode(code.trim())
+    setRunId(undefined);
+    setCodeResult(undefined);
+    setCodeErr(undefined);
+    setOutput([]);
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <nav className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800">
@@ -121,48 +134,58 @@ export default function App() {
         </h1>
       </nav>
 
-      <Toolbar.Root className="flex items-center p-2 bg-gray-200 dark:bg-gray-700 overflow-x-auto">
-        {/* <Select.Root value={lang} onValueChange={setLang}>
-          <Select.Trigger className="inline-flex items-center justify-center rounded px-3 py-2 text-sm font-medium bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 mr-2 focus:outline-none">
-            <Select.Value />
-            <Select.Icon className="ml-2">
-              <ChevronDown className="h-4 w-4" />
-            </Select.Icon>
-          </Select.Trigger>
-          <Select.Portal>
-            <Select.Content className="overflow-hidden bg-white dark:bg-gray-800 rounded-md shadow-lg">
-              <Select.Viewport className="p-1">
-                {languages.map((lang) => (
-                  <Select.Item
-                    key={lang.value}
-                    value={lang.value}
-                    className="relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md outline-none"
-                  >
-                    <Select.ItemText>{lang.label}</Select.ItemText>
-                    <Select.ItemIndicator className="absolute left-2 inline-flex items-center">
-                      <Check className="h-4 w-4" />
-                    </Select.ItemIndicator>
-                  </Select.Item>
+      <Menubar className="px-2 py-6 border-b bg-gray-200 dark:bg-gray-700">
+        <div className="w-full flex items-center">
+          <div className="flex-1">
+            {/* <Button className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500" variant="outline" size="icon">
+              <Upload className="w-4 h-4" />
+              <span className="sr-only">Import code</span>
+            </Button>
+            <Button className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500" variant="outline" size="icon">
+              <Download className="w-4 h-4" />
+              <span className="sr-only">Export code</span>
+            </Button> */}
+          </div>
+          <div className="flex-1 flex justify-center">
+            {runId ? (
+              <Button
+                className="px-2 bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500"
+                onClick={handleStop}
+                size="sm"
+                variant="ghost">
+                  <Square className="h-4 w-4 mr-2" />
+                  Stop
+              </Button>
+            ): (
+              <Button
+                className="px-2 bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500"
+                onClick={handleRun}
+                variant="ghost">
+                  <Play className="w-4 h-4 mr-2" />
+                  Run
+              </Button>
+            )}
+          </div>
+          <div className="flex-1 flex justify-end space-x-2">
+            <MenubarMenu>
+              <MenubarTrigger className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
+                <Code className="w-4 h-4 mr-2" />
+                Code samples
+              </MenubarTrigger>
+              <MenubarContent className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
+                {Object.entries(pythonSamples).map(([ label, code ]) => (
+                  <MenubarItem
+                    className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500"
+                    key={label}
+                    onClick={() => setSampleCode(code)}>
+                      {label}
+                  </MenubarItem>
                 ))}
-              </Select.Viewport>
-            </Select.Content>
-          </Select.Portal>
-        </Select.Root> */}
-        <div className="grow"/>
-        {runId ? (
-          <Toolbar.Button className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 whitespace-nowrap flex items-center" onClick={handleStop}>
-            <Square className="h-4 w-4 mr-2" />
-            Stop
-          </Toolbar.Button>
-        ) : (
-        <Toolbar.Button className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 mr-2 whitespace-nowrap flex items-center" onClick={handleRun}>
-          <Play className="h-4 w-4 mr-2" />
-          Run
-        </Toolbar.Button>
-        )}
-        <div className="grow"/>
-
-      </Toolbar.Root>
+              </MenubarContent>
+            </MenubarMenu>
+          </div>
+        </div>
+      </Menubar>
 
       <CodeEditor
         value={code}

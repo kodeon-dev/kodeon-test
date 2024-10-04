@@ -10,7 +10,7 @@ echo "Output PHP script";
 return 4;
 `;
 
-export const pythonSample = /* Python */`
+export const pythonSampleBasic = /* Python */`
 import random
 import time
 
@@ -23,3 +23,16 @@ print("Random number is " + str(num))
 
 time.time()
 `;
+
+export const pythonSampleLoop = /* Python */`
+#num = random.randint(3, 9)
+num = int(input('How many times should this loop?'))
+
+for i in range(num):
+  print("Loop number #" + str(i + 1))
+`;
+
+export const pythonSamples = {
+  'Basic': pythonSampleBasic,
+  'Loop': pythonSampleLoop,
+}
