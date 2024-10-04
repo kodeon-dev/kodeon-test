@@ -20,5 +20,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["../src/web-workers/*.ts"],
+  "include": [
+    "../src/service-worker.ts",
+    "../src/web-workers/*.ts",
+  ],
 }

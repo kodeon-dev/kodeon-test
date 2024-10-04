@@ -1,6 +1,7 @@
 import { copyFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { defineConfig, type PluginOption } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 import react from '@vitejs/plugin-react'
 
 function pyodide(): PluginOption {
@@ -40,6 +41,22 @@ export default defineConfig({
   plugins: [
     react(),
     pyodide(),
+
+    // @link https://vite-pwa-org.netlify.app/guide/service-worker-without-pwa-capabilities.html
+    VitePWA({
+      srcDir: "src",
+      filename: "service-worker.ts",
+      registerType: 'autoUpdate',
+      strategies: "injectManifest",
+      injectRegister: false,
+      manifest: false,
+      injectManifest: {
+        injectionPoint: undefined,
+      },
+      devOptions: {
+        enabled: true,
+      },
+    }),
   ],
   worker: {
     rollupOptions: {

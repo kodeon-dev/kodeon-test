@@ -1,6 +1,7 @@
 import assert from 'http-assert-plus';
 
 import PythonWorker from '../web-workers/python?worker'
+import { writeMessage } from '../lib/service-messages';
 import type { EventStatus, WorkerRequestEvent, WorkerResponseEvent } from './types'
 
 type Engine = 'PYTHON';
@@ -23,11 +24,12 @@ function startWorker(engine: Engine) {
   }
 }
 
-export async function startCodeTask({ id, engine, code, status, stdout, stderr }: {
+export async function startCodeTask({ id, engine, code, status, stdin, stdout, stderr }: {
   id: string;
   engine: Engine;
   code: string;
   status: (status: EventStatus, data?: string) => void;
+  stdin: (data: string | undefined, send: (input: string) => void) => void;
   stdout: (data: string) => void;
   stderr: (data: string) => void;
 }): Promise<void> {
@@ -55,6 +57,12 @@ export async function startCodeTask({ id, engine, code, status, stdout, stderr }
         if (statusCode === 'CANCELLED') {
           return tasks.get(key)?.resolve();
         }
+        break;
+      }
+
+      case 'STDIN': {
+        const { prompt } = event.data;
+        stdin(prompt, (input: string) => writeMessage(id, input).catch(err => console.error(err)));
         break;
       }
 

@@ -1,6 +1,7 @@
 import assert from 'http-assert-plus';
 import { loadPyodide, type PyodideInterface } from 'pyodide';
 
+import { readMessage } from '../lib/service-messages';
 import type { WorkerRequestEvent, WorkerResponseEvent } from '../lib/types';
 
 declare const self: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -25,6 +26,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
       const filename = 'main.py';
 
       let releaseLock: (() => void) | undefined = undefined;
+      let pyodide!: PyodideInterface;
 
       try {
         self.postMessage({ id, action: 'STATUS', status: 'STARTED' } as WorkerResponseEvent['data'])
@@ -33,7 +35,20 @@ self.onmessage = async (event: WorkerRequestEvent) => {
         self.lock = new Promise<void>((resolve) => releaseLock = resolve);
         assert(typeof releaseLock === 'function', 'Failed to secure writelock');
 
-        const pyodide: PyodideInterface = await self.pyodide;
+        pyodide = await self.pyodide
+
+        const script = [
+          "from js import prompt as input;",
+          code,
+        ];
+
+        pyodide.registerJsModule('js', {
+          prompt(prompt: string) {
+            self.postMessage({ id, action: 'STDIN', prompt } as WorkerResponseEvent['data']);
+            // BLOCKED until this function resolves
+            return readMessage(id, '100ms');
+          }
+        })
 
         pyodide.setStdout({
           batched(data: string) {
@@ -57,7 +72,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
         });
 
         self.postMessage({ id, action: 'STATUS', status: 'RUNNING' } as WorkerResponseEvent['data'])
-        const result = await pyodide.runPythonAsync(code, {
+        const result = await pyodide.runPythonAsync(script.join(''), {
           filename,
         });
 
@@ -73,6 +88,11 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           data: (err as any).message ?? `${err}`,
         } as WorkerResponseEvent['data']);
       } finally {
+        if (pyodide) {
+          pyodide.runPython('import sys; del sys.modules["js"];', { filename: '_cleanup.py' });
+          pyodide.unregisterJsModule('js')
+        }
+
         if (typeof releaseLock === 'function') {
           (releaseLock as (() => void))();
           self.lock = Promise.resolve();

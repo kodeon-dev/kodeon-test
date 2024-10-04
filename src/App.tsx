@@ -17,10 +17,15 @@ import { pythonSample } from './samples';
 export default function App() {
   const [code, setCode] = useState(pythonSample.trim())
   // const [lang, setLang] = useState('python')
-  const [runId, setRunId] = useState<string | undefined>(undefined)
+  const [runId, setRunId] = useState<string | undefined>()
   const [output, setOutput] = useState<RunCodeOutput[]>([])
-  const [codeResult, setCodeResult] = useState<string | undefined>(undefined)
-  const [codeErr, setCodeErr] = useState<string | undefined>(undefined)
+  const [codeResult, setCodeResult] = useState<string | undefined>()
+  const [codeErr, setCodeErr] = useState<string | undefined>()
+
+  const [testCountBack, setCountBack] = useState(1024)
+
+  // const supportsServiceWorkers = 'serviceWorker' in navigator
+  // console.log('supportsServiceWorkers', supportsServiceWorkers)
 
   async function handleRun() {
     const id = Date.now().toString();
@@ -69,6 +74,16 @@ export default function App() {
               }
               break;
             }
+          }
+        },
+        stdin(prompt, write) {
+          if (prompt) {
+            pushOutput({ type: 'STDOUT', msg: prompt })
+
+            setTimeout(() => {
+              write(testCountBack.toString())
+              setCountBack(testCountBack + 1)
+            }, 1000)
           }
         },
         stdout(data) {

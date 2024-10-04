@@ -14,7 +14,8 @@ export const pythonSample = /* Python */`
 import random
 import time
 
-num = random.randint(3, 9)
+#num = random.randint(3, 9)
+num = int(input('Hello'))
 
 print("The current time is " + str(time.time()))
 
