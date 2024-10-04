@@ -1,6 +1,6 @@
 import assert from 'http-assert-plus';
 
-import PythonWorker from '../workers/python?worker'
+import PythonWorker from '../web-workers/python?worker'
 import type { EventStatus, WorkerRequestEvent, WorkerResponseEvent } from './types'
 
 type Engine = 'PYTHON';
