@@ -5,24 +5,7 @@ import { writeMessage } from '../lib/service-messages';
 import type { EventStatus, WorkerRequestEvent, WorkerResponseEvent } from './types'
 
 type Engine = 'PYTHON';
-const workers = new Map<Engine, Worker>()
-const tasks = new Map<string, { resolve: () => void; reject: (err: Error) => void; }>();
-
-function startWorker(engine: Engine) {
-  if (workers.has(engine)) {
-    return workers.get(engine)!;
-  }
-
-  switch (engine) {
-    case 'PYTHON': {
-      const worker = new PythonWorker();
-      workers.set(engine, worker);
-      return worker;
-    }
-
-    default: return undefined;
-  }
-}
+const workers = new Map<string, Worker>()
 
 export async function startCodeTask({ id, engine, code, status, stdin, stdout, stderr }: {
   id: string;
@@ -33,13 +16,18 @@ export async function startCodeTask({ id, engine, code, status, stdin, stdout, s
   stdout: (data: string) => void;
   stderr: (data: string) => void;
 }): Promise<void> {
-  const key = `${engine}#${id}`;
+  assert(engine === 'PYTHON', 'Only PYTHON is supported');
 
-  const worker = startWorker(engine);
-  assert(worker, `Failed to start worker for: ${engine}`);
+  let worker = workers.get(engine);
+  if (!worker) {
+    worker = new PythonWorker();
+    assert(worker, `Failed to start worker for: ${engine}`);
+    workers.set(engine, worker);
+  }
 
-  const promise = new Promise<void>((resolve, reject) => {
-    tasks.set(key, { resolve, reject });
+  let resolve: () => void;
+  const promise = new Promise<void>((r1) => {
+    resolve = r1;
   });
 
   worker.onmessage = (event: WorkerResponseEvent) => {
@@ -49,13 +37,13 @@ export async function startCodeTask({ id, engine, code, status, stdin, stdout, s
         status(statusCode, data);
 
         if (statusCode === 'COMPLETED') {
-          return tasks.get(key)?.resolve();
+          return resolve();
         }
         if (statusCode === 'CRASHED') {
-          return tasks.get(key)?.resolve();
+          return resolve();
         }
         if (statusCode === 'CANCELLED') {
-          return tasks.get(key)?.resolve();
+          return resolve();
         }
         break;
       }
@@ -88,26 +76,14 @@ export async function startCodeTask({ id, engine, code, status, stdin, stdout, s
     code,
   } satisfies WorkerRequestEvent['data']);
 
-  return promise.finally(() => {
-    tasks.delete(key);
-  });
-}
-
-export function stopCodeTask(engine: Engine, id: string) {
-  const worker = workers.get(engine);
-  assert(worker, `Failed to get worker for: ${engine}`);
-  const run = tasks.get(`${engine}#${id}`);
-  assert(run, `Failed to get task for: ${engine}#${id}`);
-
-  worker.postMessage({
-    id,
-    action: 'STOP',
-  } satisfies WorkerRequestEvent['data']);
+  return promise;
 }
 
 export function stopWorker(engine: Engine) {
-  if (workers.has(engine)) {
-    const worker = workers.get(engine)!;
+  const worker = workers.get(engine);
+
+  if (worker) {
     worker.terminate();
+    workers.delete(engine);
   }
 }

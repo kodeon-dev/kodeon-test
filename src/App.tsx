@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // import * as Select from '@radix-ui/react-select';
 import * as Toolbar from '@radix-ui/react-toolbar';
 // import { Play, Square, ChevronDown, Check } from 'lucide-react';
 import { Play, Square } from 'lucide-react';
 
 import { CodeEditor, type RunCodeOutput } from './components/editor';
-import { startCodeTask, stopCodeTask } from './lib/controller';
+import { startCodeTask, stopWorker } from './lib/controller';
 import { pythonSample } from './samples';
 
 // const languages = [
@@ -104,9 +104,12 @@ export default function App() {
 
   async function handleStop() {
     if (typeof runId === 'string') {
-      console.log('Trigger cancel event');
       setOutput(output.concat({ type: 'STATUS', key: 'STOPPED', label: 'Stopped!' }));
-      stopCodeTask('PYTHON', runId);
+      stopWorker('PYTHON');
+
+      setRunId(undefined);
+      setCodeResult(undefined);
+      setCodeErr(undefined);
     }
   }
 

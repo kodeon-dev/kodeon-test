@@ -81,7 +81,7 @@ export function CodeEditor(props: CodeEditorProps) {
               case 'STATUS': {
                 const { label, key, msg } = line;
                 const classList = [
-                  (key === 'COMPLETED' || key === 'CRASHED') ? 'mt-3' : undefined,
+                  (key === 'COMPLETED' || key === 'CRASHED' || key === 'STOPPED') ? 'mt-3' : undefined,
                 ]
                 return (
                   <code key={i} className={classNames('text-sm mb-3', classList)}>
