@@ -17,12 +17,18 @@ import { pythonSample } from './samples';
 // ];
 
 export default function App() {
-  const [code, setCode] = useState(pythonSample.trim())
+  const [code, setCode] = useState(localStorage.getItem('last-edited') ?? pythonSample.trim())
   // const [lang, setLang] = useState('python')
   const [runId, setRunId] = useState<string | undefined>()
   const [output, setOutput] = useState<RunCodeOutput[]>([])
   const [codeResult, setCodeResult] = useState<string | undefined>()
   const [codeErr, setCodeErr] = useState<string | undefined>()
+
+  useEffect(() => {
+    localStorage.setItem('last-edited', code)
+  }, [
+    code,
+  ]);
 
   // const supportsServiceWorkers = 'serviceWorker' in navigator
   // console.log('supportsServiceWorkers', supportsServiceWorkers)
