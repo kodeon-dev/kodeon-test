@@ -107,7 +107,7 @@ export default function App() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <nav className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800">
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-mono font-bold">
           kodeon
         </h1>
       </nav>
