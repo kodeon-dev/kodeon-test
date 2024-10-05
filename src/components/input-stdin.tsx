@@ -40,6 +40,7 @@ export function InputStdIn({ prompt, onSubmit }: InlineCodeInputProps) {
         <input
           ref={inputRef}
           type="text"
+          placeholder="// Enter your text here"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="bg-transparent border-none outline-none font-mono text-base focus:ring-0 focus:ring-slate-300 focus:shadow-slate-300 p-0 m-0 w-full"

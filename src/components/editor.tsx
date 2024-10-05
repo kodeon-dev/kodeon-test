@@ -5,10 +5,9 @@ import { tokyoNightStormInit } from "@uiw/codemirror-theme-tokyo-night-storm";
 import { python } from '@codemirror/lang-python';
 
 import { InputStdIn } from './input-stdin';
-import { classNames } from '../lib/utils';
 
 export type RunCodeOutput =
-  | { type: 'STATUS', key: string, label: string, msg?: string }
+  | { type: 'DEBUG', msg: string }
   | { type: 'STDIN', prompt?: string | undefined, write: (value: string) => void }
   | { type: 'STDOUT', msg: string }
   | { type: 'STDERR', msg: string }
@@ -18,8 +17,6 @@ export interface CodeEditorProps {
   onValueUpdated: (value: string) => void;
   output?: RunCodeOutput[];
   onStdinSend?: (value: string) => void | undefined,
-  result?: string;
-  err?: string;
 }
 
 const options: BasicSetupOptions = {
@@ -78,17 +75,11 @@ export function CodeEditor(props: CodeEditorProps) {
         <pre className="flex flex-col whitespace-pre-wrap font-mono text-base">
           {props.output?.map((line, i) => {
             switch (line.type) {
-              case 'STATUS': {
-                const { label, key, msg } = line;
-                const classList = [
-                  (key === 'COMPLETED' || key === 'CRASHED' || key === 'STOPPED') ? 'mt-3' : undefined,
-                ]
+              case 'DEBUG': {
+                const { msg } = line;
                 return (
-                  <code key={i} className={classNames('text-sm mb-3', classList)}>
-                    <span className="text-slate-500">{label}</span>
-                    {typeof msg === 'string' && (
-                      <span className="text-slate-700">{' — '}{msg}</span>
-                    )}
+                  <code key={i} className="text-sm">
+                    <span className="text-slate-500">{msg}</span>
                   </code>
                 );
               }
@@ -109,17 +100,6 @@ export function CodeEditor(props: CodeEditorProps) {
               }
             }
           })}
-          {props.result && (
-            <>
-              <span className="text-sm text-slate-500">The return value is:</span>
-              <span>{props.result}</span>
-            </>
-          )}
-          {props.err && (
-            <>
-              <span className="text-red-700">{props.err}</span>
-            </>
-          )}
         </pre>
       </div>
     </div>
