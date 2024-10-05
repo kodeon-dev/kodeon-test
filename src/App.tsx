@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button"
 import {
   Menubar,
@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/menubar"
 import { Code, Play, Square, /* Upload, Download */ } from "lucide-react"
 
-import { CodeEditor, type RunCodeOutput } from './components/editor';
-import { startCodeTask, stopWorker } from './lib/controller';
-import { pythonSamples } from './samples';
+import ClientWorker from '@/lib/client';
+import PythonWorker from '@/web-workers/python?worker'
+import { CodeEditor, type RunCodeOutput } from '@/components/editor';
+import { pythonSamples } from '@/samples';
 
 // const languages = [
 //   { value: 'javascript', label: 'JavaScript' },
@@ -26,8 +27,8 @@ export default function App() {
   // const [lang, setLang] = useState('python')
   const [runId, setRunId] = useState<string | undefined>()
   const [output, setOutput] = useState<RunCodeOutput[]>([])
-  const [codeResult, setCodeResult] = useState<string | undefined>()
-  const [codeErr, setCodeErr] = useState<string | undefined>()
+
+  const client = useMemo(() => new ClientWorker(PythonWorker), [])
 
   useEffect(() => {
     localStorage.setItem('last-edited', code)
@@ -38,91 +39,70 @@ export default function App() {
   // const supportsServiceWorkers = 'serviceWorker' in navigator
   // console.log('supportsServiceWorkers', supportsServiceWorkers)
 
+  useEffect(() => {
+    client.setup();
+  }, [
+    client,
+  ])
+
   async function handleRun() {
     const id = Date.now().toString();
     setRunId(id);
 
     let run: RunCodeOutput[] = []
-    setCodeResult(undefined);
-    setCodeErr(undefined);
     setOutput([]);
 
-    function pushOutput(add: RunCodeOutput) {
+    function pushOutput(...add: RunCodeOutput[]) {
       setOutput(run.concat(add));
       run = run.concat(add);
     }
 
-    try {
-      await startCodeTask({
-        engine: 'PYTHON',
-        id,
-        code,
-        status(status, message) {
-          switch (status) {
-            case 'STARTED': {
-              pushOutput({ type: 'STATUS', key: status, label: 'Starting...', msg: message });
-              break;
-            }
-            case 'DEPENDENCIES': {
-              pushOutput({ type: 'STATUS', key: status, label: 'Loading dependencies...', msg: message });
-              break;
-            }
-            case 'RUNNING': {
-              pushOutput({ type: 'STATUS', key: status, label: 'Running...', msg: message });
-              break;
-            }
-            case 'COMPLETED': {
-              pushOutput({ type: 'STATUS', key: status, label: 'Completed!' });
-              if (message) {
-                setCodeResult(message)
-              }
-              break;
-            }
-            case 'CRASHED': {
-              pushOutput({ type: 'STATUS', key: status, label: 'Crashed!' });
-              if (message) {
-                setCodeErr(message)
-              }
-              break;
-            }
+    await new Promise<void>((resolve) => {
+      client.run({ id, code, filename: 'main.py' }, {
+        onDebug: (message) => pushOutput({ type: 'DEBUG', msg: message }),
+        onRunning: () => pushOutput({ type: 'DEBUG', msg: 'Running' }),
+        onStdin: (prompt, write) => pushOutput({ type: 'STDIN', prompt, write }),
+        onStdout: (data) => pushOutput({ type: 'STDOUT', msg: data }),
+        onStderr: (data) => pushOutput({ type: 'STDERR', msg: data }),
+        onCompleted(data) {
+          pushOutput({ type: 'DEBUG', msg: 'Completed' });
+          if (data) {
+            pushOutput({ type: 'DEBUG', msg: 'The return value is:' });
+            pushOutput({ type: 'STDOUT', msg: data });
           }
+
+          resolve();
         },
-        stdin(prompt, write) {
-          pushOutput({ type: 'STDIN', prompt, write })
-        },
-        stdout(data) {
-          pushOutput({ type: 'STDOUT', msg: data })
-        },
-        stderr(data) {
-          pushOutput({ type: 'STDERR', msg: data })
+        onException(err) {
+          pushOutput({ type: 'DEBUG', msg: 'Errored' });
+          if (err) {
+            pushOutput({ type: 'STDERR', msg: err });
+          }
+
+          resolve();
         },
       });
-    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      if (typeof err.message === 'string') {
-        setCodeErr(err.message)
-      }
-      pushOutput({ type: 'STATUS', key: 'CRASHED', label: 'Crashed!' });
-    } finally {
-      setRunId(undefined);
-    }
+    });
+
+    setRunId(undefined);
   }
 
-  async function handleStop() {
-    if (typeof runId === 'string') {
-      setOutput(output.concat({ type: 'STATUS', key: 'STOPPED', label: 'Stopped!' }));
-      stopWorker('PYTHON');
-
-      setRunId(undefined);
-      setCodeResult(undefined);
-      setCodeErr(undefined);
+  function handleStop() {
+    if (client.isRunning()) {
+      setOutput(output.concat({ type: 'DEBUG', msg: 'Stopped' }));
+      client.teardown();
+      client.setup();
     }
+
+    setRunId(undefined);
   }
 
   function setSampleCode(code: string) {
-    setCode(code.trim())
-    setRunId(undefined);
-    setCodeResult(undefined);
-    setCodeErr(undefined);
+    if (client.isRunning()) {
+      handleStop();
+    }
+
+    setCode(code.trim());
     setOutput([]);
   }
 
@@ -131,15 +111,15 @@ export default function App() {
       localStorage.setItem('last-edited', code)
     }
 
-    if (e.shiftKey && e.key.toLowerCase() === 'enter') {
-      handleRun()
+    if (!client.isRunning() && e.shiftKey && e.key.toLowerCase() === 'enter') {
+      handleRun();
     }
   }
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeypress);
     return () => document.removeEventListener('keydown', handleKeypress);
-  })
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -206,9 +186,6 @@ export default function App() {
         value={code}
         onValueUpdated={setCode}
         output={output}
-        // onStdinSend={codeStdinCallback}
-        result={codeResult}
-        err={codeErr}
       />
     </div>
   )

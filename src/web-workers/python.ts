@@ -1,41 +1,40 @@
-import assert from 'http-assert-plus';
 import { loadPyodide, type PyodideInterface } from 'pyodide';
 
 import { readMessage } from '@/lib/service-messages';
-import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/types';
+import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/client';
 
 declare const self: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-self.lock = undefined;
+self.pyodide = undefined;
 
-// eslint-disable-next-line no-async-promise-executor
-self.pyodide = new Promise<PyodideInterface>(async (resolve, reject) => {
-  try {
-    const pyodide = await loadPyodide();
-    // await pyodide.loadPackage(["numpy", "pytz"]);
-    resolve(pyodide);
-  } catch (err) {
-    reject(err);
-  }
-});
+async function createPyodideWorker() {
+  const pyodide = await loadPyodide();
+  // await pyodide.loadPackage(["numpy", "pytz"]);
+  return pyodide;
+}
 
 self.onmessage = async (event: WorkerRequestEvent) => {
   switch (event.data?.action) {
-    case 'RUN': {
-      const { id, code } = event.data;
-      const filename = 'main.py';
+    case 'PREPARE': {
+      if (!self.pyodide) {
+        const pyodide = self.pyodide = await createPyodideWorker();
+        pyodide.runPython('"Hello, world!"');
+      }
+      break;
+    }
 
-      let releaseLock: (() => void) | undefined = undefined;
+    case 'RUN': {
+      const { id, code, filename } = event.data;
+
       let pyodide!: PyodideInterface;
 
       try {
         self.postMessage({ id, action: 'STATUS', status: 'STARTED' } as WorkerResponseEvent['data'])
-
-        await self.lock;
-        self.lock = new Promise<void>((resolve) => releaseLock = resolve);
-        assert(typeof releaseLock === 'function', 'Failed to secure writelock');
-
-        pyodide = await self.pyodide
+        if (self.pyodide) {
+          pyodide = self.pyodide;
+        } else {
+          pyodide = self.pyodide ?? await createPyodideWorker();
+        }
 
         const script = [
           "from js import prompt as input;",
@@ -92,12 +91,13 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           pyodide.runPython('import sys; del sys.modules["js"];', { filename: '_cleanup.py' });
           pyodide.unregisterJsModule('js')
         }
-
-        if (typeof releaseLock === 'function') {
-          (releaseLock as (() => void))();
-          self.lock = Promise.resolve();
-        }
       }
+      break;
+    }
+
+    case 'TEARDOWN': {
+      self.pyodide = undefined;
+      self.pyodide = await createPyodideWorker();
       break;
     }
   }
