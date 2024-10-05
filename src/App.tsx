@@ -126,6 +126,21 @@ export default function App() {
     setOutput([]);
   }
 
+  function handleKeypress(e: KeyboardEvent) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      localStorage.setItem('last-edited', code)
+    }
+
+    if (e.shiftKey && e.key.toLowerCase() === 'enter') {
+      handleRun()
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeypress);
+    return () => document.removeEventListener('keydown', handleKeypress);
+  })
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <nav className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800">
