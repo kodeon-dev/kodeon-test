@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo, type ReactNode } from 'react';
 import CodeMirror, { EditorView, BasicSetupOptions } from "@uiw/react-codemirror";
 import { tokyoNightStormInit } from "@uiw/codemirror-theme-tokyo-night-storm";
 import { python } from '@codemirror/lang-python';
 
+import { getConfig } from '@/lib/config';
 import { InputStdIn } from './input-stdin';
 
 export type RunCodeOutput =
@@ -52,7 +54,34 @@ const theme = tokyoNightStormInit({
   },
 });
 
+function buildWarnings(config: ReturnType<typeof getConfig>) {
+  const warnings: ReactNode[] = [];
+
+  if (config.webWorkers.supported === false) {
+    warnings.push(
+      <code className="text-red-700">Web workers are not supported - your code will not execute.</code>
+    )
+  }
+
+  if (config.serviceWorkers.supported === false) {
+    warnings.push(
+      <code className="text-yellow-500">Service workers are not supported - you will not be able to enter input into your code.</code>
+    )
+  } else if (config.serviceWorkers.enabled === false) {
+    warnings.push(
+      <code className="text-yellow-500">
+        Service workers are not enabled{' - '}
+        <a className="underline decoration-dashed" href="#" onClick={() => window.location.reload()}>refresh your page</a> to restart them.
+      </code>
+    )
+  }
+
+  return warnings;
+}
+
 export function CodeEditor(props: CodeEditorProps) {
+  const config = useMemo(() => getConfig(), []);
+
   return (
     <div className="flex-grow flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
       <div className="flex-grow md:w-1/2 h-1/2 md:h-full">
@@ -73,14 +102,13 @@ export function CodeEditor(props: CodeEditorProps) {
       </div>
       <div className="flex-grow md:w-1/2 h-1/2 md:h-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-gray-100 dark:bg-gray-800 overflow-auto" style={{ minHeight: '80vh' }}>
         <pre className="flex flex-col whitespace-pre-wrap font-mono text-base">
+          {buildWarnings(config)}
           {props.output?.map((line, i) => {
             switch (line.type) {
               case 'DEBUG': {
                 const { msg } = line;
                 return (
-                  <code key={i} className="text-sm">
-                    <span className="text-slate-500">{msg}</span>
-                  </code>
+                  <code key={i} className="text-sm text-slate-500">{msg}</code>
                 );
               }
 
