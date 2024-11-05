@@ -16,20 +16,20 @@ if ('serviceWorker' in navigator) {
       await navigator.serviceWorker.register(sw, { scope: '/' });
       await navigator.serviceWorker.ready;
 
-      // if (navigator.serviceWorker.controller) {
-      //   console.log('Service worker is controlling the page');
-      // } else {
-      //   console.log('Service worker is NOT controlling the page');
+      if (navigator.serviceWorker.controller) {
+        // console.log('Service worker is controlling the page');
+        sessionStorage.removeItem('cold-start');
+        return;
+      }
 
-      //   setTimeout(function wait() {
-      //     if (navigator.serviceWorker.controller) {
-      //       console.log('Service worker is controlling the page');
-      //     } else {
-      //       console.log('Service worker is NOT controlling the page');
-      //       setTimeout(wait, 1000)
-      //     }
-      //   }, 1000)
-      // }
+      // console.log('Service worker is NOT controlling the page');
+
+      const coldStarted = sessionStorage.getItem('cold-start');
+      if (!coldStarted) {
+        // console.log('Cold-start, so reloading');
+        sessionStorage.setItem('cold-start', 'true');
+        window.location.reload();
+      }
     } catch (err) {
       console.error('Service Worker Registration failed:', err);
     }
