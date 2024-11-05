@@ -22,11 +22,18 @@ export type RunCodeOutput =
   | { type: "STDERR"; msg: string };
 
 export interface CodeEditorProps {
+  placeholder?: string | undefined;
   value: string;
   onValueUpdated: (value: string) => void;
   output?: RunCodeOutput[];
   onStdinSend?: (value: string) => void | undefined;
 }
+
+const defaultPlaceholder = `
+Welcome to Kodeon!
+Type your Python code here
+And hit 'Run' to run your code
+`.trim();
 
 const options: BasicSetupOptions = {
   lineNumbers: true,
@@ -116,7 +123,7 @@ export function CodeEditor(props: CodeEditorProps) {
             onChange={(value) => props.onValueUpdated(value)}
             autoFocus={true}
             extensions={[EditorView.lineWrapping, python()]}
-            placeholder="Type some code here!"
+            placeholder={props.placeholder ?? defaultPlaceholder}
             basicSetup={options}
             lang="python"
           />
