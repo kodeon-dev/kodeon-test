@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from 'react';
 
 interface InlineCodeInputProps {
   prompt?: string | undefined;
@@ -11,7 +11,7 @@ interface InlineCodeInputProps {
  * @link https://v0.dev/chat/cCcXxCS1VJw
  */
 export function InputStdIn({ prompt, onSubmit }: InlineCodeInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [hasSubmitted, setSubmitState] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -41,10 +41,7 @@ export function InputStdIn({ prompt, onSubmit }: InlineCodeInputProps) {
     }
   } else {
     return (
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col font-mono text-base"
-      >
+      <form onSubmit={handleSubmit} className="flex flex-col font-mono text-base">
         {prompt && <span className="whitespace-pre-wrap">{prompt}</span>}
         <input
           ref={inputRef}
@@ -53,7 +50,7 @@ export function InputStdIn({ prompt, onSubmit }: InlineCodeInputProps) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="bg-transparent border-none outline-none font-mono text-base focus:ring-0 focus:ring-slate-300 focus:shadow-slate-300 p-0 m-0 w-full"
-          style={{ caretColor: "inherit" }}
+          style={{ caretColor: 'inherit' }}
         />
       </form>
     );

@@ -1,20 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import { Code, Play, Square /* Upload, Download */ } from "lucide-react";
+import { useState, useEffect, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
+import { Code, Play, Square /* Upload, Download */ } from 'lucide-react';
 
-import ClientWorker from "@/lib/client";
-import PythonWorker from "@/web-workers/python?worker";
-import { CodeEditor, type RunCodeOutput } from "@/components/editor";
-import { pythonSamples } from "@/samples";
+import ClientWorker from '@/lib/client';
+import PythonWorker from '@/web-workers/python?worker';
+import { CodeEditor, type RunCodeOutput } from '@/components/editor';
+import { pythonSamples } from '@/samples';
 
 // const languages = [
 //   { value: 'javascript', label: 'JavaScript' },
@@ -23,9 +17,7 @@ import { pythonSamples } from "@/samples";
 // ];
 
 export default function App() {
-  const [code, setCode] = useState(
-    localStorage.getItem("last-edited") ?? pythonSamples.Basic.trim()
-  );
+  const [code, setCode] = useState(localStorage.getItem('last-edited') ?? '');
   // const [lang, setLang] = useState('python')
   const [runId, setRunId] = useState<string | undefined>();
   const [output, setOutput] = useState<RunCodeOutput[]>([]);
@@ -33,7 +25,7 @@ export default function App() {
   const client = useMemo(() => new ClientWorker(PythonWorker), []);
 
   useEffect(() => {
-    localStorage.setItem("last-edited", code);
+    localStorage.setItem('last-edited', code);
   }, [code]);
 
   // const supportsServiceWorkers = 'serviceWorker' in navigator
@@ -57,32 +49,31 @@ export default function App() {
 
     await new Promise<void>((resolve) => {
       client.run(
-        { id, code, filename: "main.py" },
+        { id, code, filename: 'main.py' },
         {
-          onDebug: (message) => pushOutput({ type: "DEBUG", msg: message }),
-          onRunning: () => pushOutput({ type: "DEBUG", msg: "Running" }),
-          onStdin: (prompt, write) =>
-            pushOutput({ type: "STDIN", prompt, write }),
-          onStdout: (data) => pushOutput({ type: "STDOUT", msg: data }),
-          onStderr: (data) => pushOutput({ type: "STDERR", msg: data }),
+          onDebug: (message) => pushOutput({ type: 'DEBUG', msg: message }),
+          onRunning: () => pushOutput({ type: 'DEBUG', msg: 'Running' }),
+          onStdin: (prompt, write) => pushOutput({ type: 'STDIN', prompt, write }),
+          onStdout: (data) => pushOutput({ type: 'STDOUT', msg: data }),
+          onStderr: (data) => pushOutput({ type: 'STDERR', msg: data }),
           onCompleted(data) {
-            pushOutput({ type: "DEBUG", msg: "Completed" });
+            pushOutput({ type: 'DEBUG', msg: 'Completed' });
             if (data) {
-              pushOutput({ type: "DEBUG", msg: "The return value is:" });
-              pushOutput({ type: "STDOUT", msg: data });
+              pushOutput({ type: 'DEBUG', msg: 'The return value is:' });
+              pushOutput({ type: 'STDOUT', msg: data });
             }
 
             resolve();
           },
           onException(err) {
-            pushOutput({ type: "DEBUG", msg: "Errored" });
+            pushOutput({ type: 'DEBUG', msg: 'Errored' });
             if (err) {
-              pushOutput({ type: "STDERR", msg: err });
+              pushOutput({ type: 'STDERR', msg: err });
             }
 
             resolve();
           },
-        }
+        },
       );
     });
 
@@ -91,7 +82,7 @@ export default function App() {
 
   function handleStop() {
     if (client.isRunning()) {
-      setOutput(output.concat({ type: "DEBUG", msg: "Stopped" }));
+      setOutput(output.concat({ type: 'DEBUG', msg: 'Stopped' }));
       client.teardown();
       client.setup();
     }
@@ -109,18 +100,18 @@ export default function App() {
   }
 
   function handleKeypress(e: KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
-      localStorage.setItem("last-edited", code);
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      localStorage.setItem('last-edited', code);
     }
 
-    if (!client.isRunning() && e.shiftKey && e.key.toLowerCase() === "enter") {
+    if (!client.isRunning() && e.shiftKey && e.key.toLowerCase() === 'enter') {
       handleRun();
     }
   }
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeypress);
-    return () => document.removeEventListener("keydown", handleKeypress);
+    document.addEventListener('keydown', handleKeypress);
+    return () => document.removeEventListener('keydown', handleKeypress);
   });
 
   return (

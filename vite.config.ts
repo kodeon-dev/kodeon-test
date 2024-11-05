@@ -1,27 +1,19 @@
-import { copyFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { defineConfig, type PluginOption } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
-import react from "@vitejs/plugin-react";
+import { copyFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { defineConfig, type PluginOption } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+import react from '@vitejs/plugin-react';
 
 function pyodide(): PluginOption {
-  const assetsDir = "dist/assets";
-  const files = [
-    "pyodide-lock.json",
-    "pyodide.asm.js",
-    "pyodide.asm.wasm",
-    "python_stdlib.zip",
-  ];
+  const assetsDir = 'dist/assets';
+  const files = ['pyodide-lock.json', 'pyodide.asm.js', 'pyodide.asm.wasm', 'python_stdlib.zip'];
 
   return {
-    name: "vite-plugin-pyodide",
+    name: 'vite-plugin-pyodide',
     async generateBundle() {
       await mkdir(assetsDir, { recursive: true });
       for (const file of files) {
-        await copyFile(
-          join("node_modules/pyodide", file),
-          join(assetsDir, file)
-        );
+        await copyFile(join('node_modules/pyodide', file), join(assetsDir, file));
       }
     },
   };
@@ -36,7 +28,7 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    exclude: ["pyodide"],
+    exclude: ['pyodide'],
   },
   plugins: [
     react(),
@@ -44,10 +36,10 @@ export default defineConfig({
 
     // @link https://vite-pwa-org.netlify.app/guide/service-worker-without-pwa-capabilities.html
     VitePWA({
-      srcDir: "src",
-      filename: "service-worker.ts",
-      registerType: "autoUpdate",
-      strategies: "injectManifest",
+      srcDir: 'src',
+      filename: 'service-worker.ts',
+      registerType: 'autoUpdate',
+      strategies: 'injectManifest',
       injectRegister: false,
       manifest: false,
       injectManifest: {
@@ -67,7 +59,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": join(__dirname, "./src"),
+      '@': join(__dirname, './src'),
     },
   },
 });
