@@ -1,5 +1,5 @@
-import assert from 'http-assert-plus';
-import ms from 'ms';
+import assert from "http-assert-plus";
+import ms from "ms";
 
 /**
  * Reads via SYNCHRONOUS XMLHTTPREQUEST
@@ -11,16 +11,19 @@ export function readMessage(messageId: string, timeout: string): string {
       // console.log('readMessage REQ', messageId);
 
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/stdin/read', false);
-      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.open("POST", "/stdin/read", false);
+      xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(JSON.stringify({ messageId, timeout: ms(timeout) }));
 
       // console.log('readMessage RES', xhr.status, xhr.responseText)
 
       switch (xhr.status) {
         case 200: {
-          const { value } = JSON.parse(xhr.responseText)
-          assert(typeof value === 'string', 'Missing value from successful stdin read')
+          const { value } = JSON.parse(xhr.responseText);
+          assert(
+            typeof value === "string",
+            "Missing value from successful stdin read"
+          );
           return value;
         }
 
@@ -30,23 +33,23 @@ export function readMessage(messageId: string, timeout: string): string {
         }
 
         default: {
-          const { error } = JSON.parse(xhr.responseText)
-          if (typeof error === 'string') {
-            assert.fail(error)
+          const { error } = JSON.parse(xhr.responseText);
+          if (typeof error === "string") {
+            assert.fail(error);
           } else {
-            assert.fail(new Error('Service worker API: Read failed'));
+            assert.fail(new Error("Service worker API: Read failed"));
           }
         }
       }
     } catch (err) {
-      console.error('readMessage REQ', err)
-      return undefined
+      console.error("readMessage REQ", err);
+      return undefined;
     }
   }
 
   function wait(delay: string) {
     const start = Date.now();
-    const end = ms(delay)
+    const end = ms(delay);
     while (Date.now() - start < end) {
       // Do nothing but wasting time
     }
@@ -55,10 +58,10 @@ export function readMessage(messageId: string, timeout: string): string {
   while (true) {
     const result = checkTextmail();
 
-    if (typeof result === 'string') {
-      return result
+    if (typeof result === "string") {
+      return result;
     } else {
-      wait('1s')
+      wait("1s");
     }
   }
 }
@@ -72,7 +75,7 @@ export async function writeMessage(messageId: string, value: string) {
   // @ts-ignore
   if (typeof window !== "undefined") {
     // @ts-ignore
-    if ('serviceWorker' in window.navigator) {
+    if ("serviceWorker" in window.navigator) {
       // @ts-ignore
       await window.navigator.serviceWorker.ready;
     }
@@ -80,22 +83,24 @@ export async function writeMessage(messageId: string, value: string) {
 
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/stdin/write', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.open("POST", "/stdin/write", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         // console.log('writeMessage RES', xhr.status, xhr.responseText)
 
         switch (xhr.status) {
-          case 200: return resolve();
-          case 404: return reject(new Error('Service worker API: Not found'));
+          case 200:
+            return resolve();
+          case 404:
+            return reject(new Error("Service worker API: Not found"));
           default: {
-            const { error } = JSON.parse(xhr.responseText)
-            if (typeof error === 'string') {
+            const { error } = JSON.parse(xhr.responseText);
+            if (typeof error === "string") {
               return reject(new Error(error));
             } else {
-              return reject(new Error('Service worker API: Write failed'));
+              return reject(new Error("Service worker API: Write failed"));
             }
           }
         }
