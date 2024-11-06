@@ -1,11 +1,13 @@
 'use client';
 
-import { useMemo, type ReactNode } from 'react';
+import { useMemo } from 'react';
 import CodeMirror, { EditorView, BasicSetupOptions } from '@uiw/react-codemirror';
 import { tokyoNightStormInit } from '@uiw/codemirror-theme-tokyo-night-storm';
-import { python } from '@codemirror/lang-python';
+import type { python } from '@codemirror/lang-python';
 
 import { getConfig } from '@/lib/config';
+import { useCodeWarnings } from '@/hooks/useCodeWarnings';
+
 import { InputStdIn } from './input-stdin';
 
 export type RunCodeOutput =
@@ -19,18 +21,14 @@ export type RunCodeOutput =
   | { type: 'STDERR'; msg: string };
 
 export interface CodeEditorProps {
+  lang: 'python';
+  highlight: typeof python;
   placeholder?: string | undefined;
   value: string;
   onValueUpdated: (value: string) => void;
   output?: RunCodeOutput[];
   onStdinSend?: (value: string) => void | undefined;
 }
-
-const defaultPlaceholder = `
-Welcome to Kodeon!
-Type your Python code here
-And hit 'Run' to run your code
-`.trim();
 
 const options: BasicSetupOptions = {
   lineNumbers: true,
@@ -65,40 +63,9 @@ const theme = tokyoNightStormInit({
   },
 });
 
-function buildWarnings(config: ReturnType<typeof getConfig>) {
-  const warnings: ReactNode[] = [];
-
-  if (config.webWorkers.supported === false) {
-    warnings.push(
-      <code key="web-workers-not-supported" className="text-red-700">
-        Web workers are not supported - your code will not execute.
-      </code>,
-    );
-  }
-
-  if (config.serviceWorkers.supported === false) {
-    warnings.push(
-      <code key="service-workers-not-supported" className="text-yellow-500">
-        Service workers are not supported - you will not be able to enter input into your code.
-      </code>,
-    );
-  } else if (config.serviceWorkers.enabled === false) {
-    warnings.push(
-      <code key="service-workers-not-enabled" className="text-yellow-500">
-        Service workers are not enabled{' - '}
-        <a className="underline decoration-dashed" href="#" onClick={() => window.location.reload()}>
-          refresh your page
-        </a>{' '}
-        to restart them.
-      </code>,
-    );
-  }
-
-  return warnings;
-}
-
 export function CodeEditor(props: CodeEditorProps) {
   const config = useMemo(() => getConfig(), []);
+  const warnings = useCodeWarnings(config);
 
   return (
     <div className="flex-grow flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
@@ -114,10 +81,10 @@ export function CodeEditor(props: CodeEditorProps) {
             theme={theme}
             onChange={(value) => props.onValueUpdated(value)}
             autoFocus={true}
-            extensions={[EditorView.lineWrapping, python()]}
-            placeholder={props.placeholder ?? defaultPlaceholder}
+            extensions={[EditorView.lineWrapping, props.highlight()]}
+            placeholder={props.placeholder}
             basicSetup={options}
-            lang="python"
+            lang={props.lang}
           />
         </div>
       </div>
@@ -126,7 +93,7 @@ export function CodeEditor(props: CodeEditorProps) {
         style={{ minHeight: 'calc(100vh - 150px)' }}
       >
         <pre className="flex flex-col whitespace-pre-wrap font-mono text-base">
-          {buildWarnings(config)}
+          {warnings}
           {props.output?.map((line, i) => {
             switch (line.type) {
               case 'DEBUG': {
