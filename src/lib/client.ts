@@ -85,7 +85,7 @@ export default class ClientWorker {
               case 'RUNNING':
                 return callbacks?.onRunning?.();
               case 'COMPLETED':
-                return callbacks?.onCompleted?.(data);
+                return callbacks?.onCompleted?.();
               case 'CRASHED':
                 return callbacks?.onException?.(data ?? 'An error occurred');
               default:
