@@ -12,7 +12,7 @@ import { useCode } from '@/hooks/useCode';
 
 export interface CodeShellProps {
   lang: CodeEditorProps['lang'];
-  filename: string;
+  filename: CodeEditorProps['filename'];
   localStorageKey: string;
   workerClass: typeof PythonWorker;
   placeholder?: CodeEditorProps['placeholder'];
@@ -175,6 +175,7 @@ export function CodeShell(props: CodeShellProps) {
 
       <CodeEditor
         lang={props.lang}
+        filename={props.filename}
         placeholder={props.placeholder}
         highlight={props.highlight}
         value={code}
