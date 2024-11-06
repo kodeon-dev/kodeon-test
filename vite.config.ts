@@ -2,6 +2,7 @@ import { copyFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { defineConfig, type PluginOption } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import react from '@vitejs/plugin-react';
 
 function pyodide(): PluginOption {
@@ -48,6 +49,16 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+    }),
+
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'dist/index.html', // source file in the output directory
+          dest: '', // destination folder (root of the `dist` folder)
+          rename: '404.html', // rename the copied file
+        },
+      ],
     }),
   ],
   worker: {
