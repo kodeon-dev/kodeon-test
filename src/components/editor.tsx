@@ -74,8 +74,9 @@ export function CodeEditor(props: CodeEditorProps) {
           className="w-full h-full resize-none font-mono bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md"
           style={{ minHeight: 'calc(100vh - 150px)' }}
         >
+          <p className="pt-3 px-3 font-mono text-sm">main.py</p>
           <CodeMirror
-            className="w-full h-full p-3 font-mono text-base"
+            className="w-full h-full p-3 font-mono text-sm"
             minHeight="100%"
             value={props.value}
             theme={theme}
@@ -89,10 +90,11 @@ export function CodeEditor(props: CodeEditorProps) {
         </div>
       </div>
       <div
-        className="flex-grow md:w-1/2 h-1/2 md:h-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-gray-100 dark:bg-gray-800 overflow-auto"
+        className="flex-grow md:w-1/2 h-1/2 md:h-full border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-800 overflow-auto"
         style={{ minHeight: 'calc(100vh - 150px)' }}
       >
-        <pre className="flex flex-col whitespace-pre-wrap font-mono text-base">
+        <p className="pt-3 px-3 font-mono text-sm">Output</p>
+        <pre className="flex flex-col p-3 whitespace-pre-wrap font-mono text-base">
           {warnings}
           {props.output?.map((line, i) => {
             switch (line.type) {
