@@ -1,9 +1,21 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Play, Square } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
-import { Code, Play, Square /* Upload, Download */ } from 'lucide-react';
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+  MenubarSub,
+  MenubarSubTrigger,
+  MenubarSubContent,
+} from '@/components/ui/menubar';
 
 import ClientWorker from '@/lib/client';
 import type PythonWorker from '@/web-workers/python?worker';
@@ -11,16 +23,18 @@ import { CodeEditor, type CodeEditorProps, type RunCodeOutput } from '@/componen
 import { useCode } from '@/hooks/useCode';
 
 export interface CodeShellProps {
-  lang: CodeEditorProps['lang'];
-  filename: CodeEditorProps['filename'];
   localStorageKey: string;
   workerClass: typeof PythonWorker;
+  lang: CodeEditorProps['lang'];
+  filename: CodeEditorProps['filename'];
   placeholder?: CodeEditorProps['placeholder'];
   highlight: CodeEditorProps['highlight'];
-  sampleCode: Record<string, string>;
+  sampleCode?: Record<string, string>;
 }
 
 export function CodeShell(props: CodeShellProps) {
+  const navigate = useNavigate();
+
   const [code, setCode] = useCode(props.localStorageKey);
   const [runId, setRunId] = useState<string>();
   const [output, setOutput] = useState<RunCodeOutput[]>([]);
@@ -61,10 +75,13 @@ export function CodeShell(props: CodeShellProps) {
 
             resolve();
           },
-          onException(err) {
+          onException(err, stack) {
             pushOutput({ type: 'DEBUG', msg: 'Errored' });
             if (err) {
-              pushOutput({ type: 'STDERR', msg: err });
+              pushOutput({
+                type: 'STDERR',
+                msg: ((a) => a.join('\n'))([err, ...(stack ?? [])]),
+              });
             }
 
             resolve();
@@ -86,14 +103,14 @@ export function CodeShell(props: CodeShellProps) {
     setRunId(undefined);
   }
 
-  function setSampleCode(code: string) {
-    if (client.isRunning()) {
-      handleStop();
-    }
-
-    setCode(code.trim());
-    setOutput([]);
-  }
+  // function setSampleCode(code: string) {
+  //   if (client.isRunning()) {
+  //     handleStop();
+  //   }
+  //
+  //   setCode(code.trim());
+  //   setOutput([]);
+  // }
 
   function handleKeypress(e: KeyboardEvent) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -119,15 +136,27 @@ export function CodeShell(props: CodeShellProps) {
 
       <Menubar className="px-2 py-6 border-b bg-gray-200 dark:bg-gray-700">
         <div className="w-full flex items-center">
-          <div className="flex-1">
-            {/* <Button className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500" variant="outline" size="icon">
-              <Upload className="w-4 h-4" />
-              <span className="sr-only">Import code</span>
-            </Button>
-            <Button className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500" variant="outline" size="icon">
-              <Download className="w-4 h-4" />
-              <span className="sr-only">Export code</span>
-            </Button> */}
+          <div className="flex-1 flex flex-row">
+            <Menubar>
+              <MenubarMenu>
+                <MenubarTrigger>Menu</MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem>New Tab</MenubarItem>
+                  <MenubarItem>New Window</MenubarItem>
+                  <MenubarSeparator />
+                  <MenubarSub>
+                    <MenubarSubTrigger>Share</MenubarSubTrigger>
+                    <MenubarSubContent>
+                      <MenubarItem>Email link</MenubarItem>
+                      <MenubarItem>Messages</MenubarItem>
+                      <MenubarItem>Notes</MenubarItem>
+                    </MenubarSubContent>
+                  </MenubarSub>
+                  <MenubarSeparator />
+                  <MenubarItem>Print</MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            </Menubar>
           </div>
           <div className="flex-1 flex justify-center">
             {runId ? (
@@ -152,23 +181,37 @@ export function CodeShell(props: CodeShellProps) {
             )}
           </div>
           <div className="flex-1 flex justify-end space-x-2">
-            <MenubarMenu>
-              <MenubarTrigger className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
-                <Code className="w-4 h-4 mr-2" />
-                Code samples
-              </MenubarTrigger>
-              <MenubarContent className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
-                {Object.entries(props.sampleCode).map(([label, code]) => (
-                  <MenubarItem
-                    className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500"
-                    key={label}
-                    onClick={() => setSampleCode(code)}
-                  >
-                    {label}
+            {/* {props.sampleCode && (
+              <MenubarMenu>
+                <MenubarTrigger>
+                  <Code className="w-4 h-4 mr-2" />
+                  Code samples
+                </MenubarTrigger>
+                <MenubarContent>
+                  {Object.entries(props.sampleCode).map(([label, code]) => (
+                    <MenubarItem key={label} onClick={() => setSampleCode(code)}>
+                      {label}
+                    </MenubarItem>
+                  ))}
+                </MenubarContent>
+              </MenubarMenu>
+            )} */}
+
+            <Menubar>
+              <MenubarMenu>
+                <MenubarTrigger>Languages</MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem onClick={() => navigate('/javascript')}>
+                    <img className="h-4 w-4 me-2" src="/file_type_js_official.svg" />
+                    Javascript
                   </MenubarItem>
-                ))}
-              </MenubarContent>
-            </MenubarMenu>
+                  <MenubarItem onClick={() => navigate('/python')}>
+                    <img className="h-4 w-4 me-2" src="/file_type_python.svg" />
+                    Python
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            </Menubar>
           </div>
         </div>
       </Menubar>

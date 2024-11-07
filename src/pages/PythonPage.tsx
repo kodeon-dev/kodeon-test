@@ -13,7 +13,7 @@ const placeholder = `
 # And hit 'Run' to run your code
 `.trim();
 
-export const pythonSampleBasic = /* Python */ `
+export const sampleBasic = /* Python */ `
 import random
 import time
 
@@ -27,7 +27,7 @@ print("Random number is " + str(num))
 time.time()
 `;
 
-export const pythonSampleLoop = /* Python */ `
+export const sampleLoop = /* Python */ `
 #num = random.randint(3, 9)
 num = int(input('How many times should this loop?'))
 
@@ -44,8 +44,8 @@ export default function PythonPage() {
     filename: 'main.py',
     placeholder,
     sampleCode: {
-      Basic: pythonSampleBasic,
-      Loop: pythonSampleLoop,
+      Basic: sampleBasic,
+      Loop: sampleLoop,
     },
   });
 }
