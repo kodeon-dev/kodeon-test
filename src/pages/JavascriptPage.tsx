@@ -28,7 +28,7 @@ export default function PythonPage() {
     lang: 'javascript',
     workerClass: JavascriptWorker,
     highlight: javascript,
-    localStorageKey: localStorageKeys.code.pythonLastEdited,
+    localStorageKey: localStorageKeys.code.javascriptLastEdited,
     filename: 'main.js',
     placeholder,
     sampleCode: {

@@ -75,7 +75,11 @@ export function CodeEditor(props: CodeEditorProps) {
           className="w-full h-full resize-none font-mono bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md"
           style={{ minHeight: 'calc(100vh - 150px)' }}
         >
-          <p className="pt-3 px-3 font-mono text-sm">{props.filename}</p>
+          <p className="flex flex-row items-center pt-3 px-3 font-mono text-sm">
+            {props.filename.endsWith('.js') && <img className="h-4 w-4 me-2" src="/file_type_js_official.svg" />}
+            {props.filename.endsWith('.py') && <img className="h-4 w-4 me-2" src="/file_type_python.svg" />}
+            {props.filename}
+          </p>
           <CodeMirror
             className="w-full h-full p-3 font-mono text-sm"
             minHeight="100%"
