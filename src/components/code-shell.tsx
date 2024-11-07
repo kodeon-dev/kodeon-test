@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
-import { Code, Play, Square /* Upload, Download */ } from 'lucide-react';
+import { Code, Play, Square } from 'lucide-react';
 
 import ClientWorker from '@/lib/client';
 import type PythonWorker from '@/web-workers/python?worker';
@@ -11,13 +11,13 @@ import { CodeEditor, type CodeEditorProps, type RunCodeOutput } from '@/componen
 import { useCode } from '@/hooks/useCode';
 
 export interface CodeShellProps {
-  lang: CodeEditorProps['lang'];
-  filename: CodeEditorProps['filename'];
   localStorageKey: string;
   workerClass: typeof PythonWorker;
+  lang: CodeEditorProps['lang'];
+  filename: CodeEditorProps['filename'];
   placeholder?: CodeEditorProps['placeholder'];
   highlight: CodeEditorProps['highlight'];
-  sampleCode: Record<string, string>;
+  sampleCode?: Record<string, string>;
 }
 
 export function CodeShell(props: CodeShellProps) {
@@ -61,10 +61,13 @@ export function CodeShell(props: CodeShellProps) {
 
             resolve();
           },
-          onException(err) {
+          onException(err, stack) {
             pushOutput({ type: 'DEBUG', msg: 'Errored' });
             if (err) {
-              pushOutput({ type: 'STDERR', msg: err });
+              pushOutput({
+                type: 'STDERR',
+                msg: ((a) => a.join('\n'))([err, ...(stack ?? [])]),
+              });
             }
 
             resolve();
@@ -119,16 +122,7 @@ export function CodeShell(props: CodeShellProps) {
 
       <Menubar className="px-2 py-6 border-b bg-gray-200 dark:bg-gray-700">
         <div className="w-full flex items-center">
-          <div className="flex-1">
-            {/* <Button className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500" variant="outline" size="icon">
-              <Upload className="w-4 h-4" />
-              <span className="sr-only">Import code</span>
-            </Button>
-            <Button className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500" variant="outline" size="icon">
-              <Download className="w-4 h-4" />
-              <span className="sr-only">Export code</span>
-            </Button> */}
-          </div>
+          <div className="flex-1"></div>
           <div className="flex-1 flex justify-center">
             {runId ? (
               <Button
@@ -152,23 +146,25 @@ export function CodeShell(props: CodeShellProps) {
             )}
           </div>
           <div className="flex-1 flex justify-end space-x-2">
-            <MenubarMenu>
-              <MenubarTrigger className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
-                <Code className="w-4 h-4 mr-2" />
-                Code samples
-              </MenubarTrigger>
-              <MenubarContent className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
-                {Object.entries(props.sampleCode).map(([label, code]) => (
-                  <MenubarItem
-                    className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500"
-                    key={label}
-                    onClick={() => setSampleCode(code)}
-                  >
-                    {label}
-                  </MenubarItem>
-                ))}
-              </MenubarContent>
-            </MenubarMenu>
+            {props.sampleCode && (
+              <MenubarMenu>
+                <MenubarTrigger className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
+                  <Code className="w-4 h-4 mr-2" />
+                  Code samples
+                </MenubarTrigger>
+                <MenubarContent className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500">
+                  {Object.entries(props.sampleCode).map(([label, code]) => (
+                    <MenubarItem
+                      className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500"
+                      key={label}
+                      onClick={() => setSampleCode(code)}
+                    >
+                      {label}
+                    </MenubarItem>
+                  ))}
+                </MenubarContent>
+              </MenubarMenu>
+            )}
           </div>
         </div>
       </Menubar>

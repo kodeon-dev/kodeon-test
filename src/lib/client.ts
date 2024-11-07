@@ -14,7 +14,13 @@ export interface WorkerRequestEvent {
 }
 export interface WorkerResponseEvent {
   data?:
-    | { id: string; action: 'STATUS'; status: EventStatus; data?: string }
+    | {
+        id: string;
+        action: 'STATUS';
+        status: EventStatus;
+        data?: string;
+        err?: { message: string; stack: string[] };
+      }
     | { id: string; action: 'STDIN'; prompt?: string }
     | { id: string; action: 'STDOUT'; data: string }
     | { id: string; action: 'STDERR'; data: string }
@@ -60,7 +66,7 @@ export default class ClientWorker {
       onStdout?: (data: string) => void;
       onStderr?: (data: string) => void;
       onCompleted?: (data?: string) => void;
-      onException?: (err: string) => void;
+      onException?: (message: string, stack?: string[]) => void;
     },
   ): Promise<void> {
     let releaseLock!: () => void;
@@ -75,7 +81,7 @@ export default class ClientWorker {
       this.worker.onmessage = (event: WorkerResponseEvent): void => {
         switch (event.data?.action) {
           case 'STATUS': {
-            const { status, data } = event.data;
+            const { status, data, err } = event.data;
 
             switch (status) {
               case 'STARTED':
@@ -87,7 +93,7 @@ export default class ClientWorker {
               case 'COMPLETED':
                 return callbacks?.onCompleted?.();
               case 'CRASHED':
-                return callbacks?.onException?.(data ?? 'An error occurred');
+                return callbacks?.onException?.(err?.message ?? data ?? 'An error occurred', err?.stack);
               default:
                 return console.warn('Unknown event from worker:', status);
             }
@@ -125,7 +131,15 @@ export default class ClientWorker {
         code,
       } satisfies WorkerRequestEvent['data']);
     } catch (err) {
-      callbacks?.onException?.((err as Error).message ?? 'An error occurred');
+      const { message, stack } = err as unknown as {
+        message: string;
+        stack: string;
+      };
+
+      callbacks?.onException?.(
+        message ?? 'An error occurred',
+        stack.split('\n').map((s) => s.trim()),
+      );
     } finally {
       releaseLock();
     }

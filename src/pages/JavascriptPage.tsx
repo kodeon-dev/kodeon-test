@@ -8,31 +8,19 @@ import { localStorageKeys } from '@/constants';
 import { CodeShell } from '@/components/code-shell';
 
 const placeholder = `
-# Welcome to Kodeon!
-# Type your Python code here
-# And hit 'Run' to run your code
+// Welcome to Kodeon!
+// Type your Javascript code here
+// And hit 'Run' to run your code
 `.trim();
 
-export const pythonSampleBasic = /* Python */ `
-import random
-import time
+export const sampleBasic = /* Python */ `
+var a = 1
 
-#num = random.randint(3, 9)
-num = int(input('Hello'))
+do {
+  a++;
+} while (a < 10)
 
-print("The current time is " + str(time.time()))
-
-print("Random number is " + str(num))
-
-time.time()
-`;
-
-export const pythonSampleLoop = /* Python */ `
-#num = random.randint(3, 9)
-num = int(input('How many times should this loop?'))
-
-for i in range(num):
-  print("Loop number #" + str(i + 1))
+console.log(a)
 `;
 
 export default function PythonPage() {
@@ -44,8 +32,7 @@ export default function PythonPage() {
     filename: 'main.js',
     placeholder,
     sampleCode: {
-      Basic: pythonSampleBasic,
-      Loop: pythonSampleLoop,
+      Basic: sampleBasic,
     },
   });
 }
