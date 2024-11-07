@@ -72,8 +72,8 @@ export function CodeEditor(props: CodeEditorProps) {
     <div className="flex-grow flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
       <div className="flex-grow md:w-1/2 h-1/2 md:h-full">
         <div
-          className="w-full h-full resize-none font-mono bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md"
-          style={{ minHeight: 'calc(100vh - 150px)' }}
+          className="w-full h-full resize-none font-mono bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md overflow-y-auto"
+          style={{ height: 'calc(100vh - 150px)' }}
         >
           <p className="flex flex-row items-center pt-3 px-3 font-mono text-sm">
             {props.filename.endsWith('.js') && <img className="h-4 w-4 me-2" src="/file_type_js_official.svg" />}
@@ -81,8 +81,8 @@ export function CodeEditor(props: CodeEditorProps) {
             {props.filename}
           </p>
           <CodeMirror
-            className="w-full h-full p-3 font-mono text-sm"
-            minHeight="100%"
+            className="w-full p-3 font-mono text-sm"
+            minHeight="90%"
             value={props.value}
             theme={theme}
             onChange={(value) => props.onValueUpdated(value)}
@@ -95,8 +95,8 @@ export function CodeEditor(props: CodeEditorProps) {
         </div>
       </div>
       <div
-        className="flex-grow md:w-1/2 h-1/2 md:h-full border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-800 overflow-auto"
-        style={{ minHeight: 'calc(100vh - 150px)' }}
+        className="flex-grow md:w-1/2 h-1/2 md:h-full border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-800 overflow-y-auto"
+        style={{ height: 'calc(100vh - 150px)' }}
       >
         <p className="pt-3 px-3 font-mono text-sm">Output</p>
         <pre className="flex flex-col p-3 whitespace-pre-wrap font-mono text-base">
