@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-useless-escape
-const ERR_REGEX = /eval at <anonymous> \(eval at makeEvaluate \(([^\)]+)\)\), /g;
+const ERR_REGEX = /eval at <anonymous> \(eval at ([A-z]+) \(([^\)]+)\)\), /g;
 
 export function cleanErrorStack(filename: string, stack: string[]) {
   return stack.reduce((list, line) => {
