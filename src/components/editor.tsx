@@ -22,7 +22,7 @@ export type RunCodeOutput =
 
 export interface CodeEditorProps {
   filename: string;
-  lang: 'python';
+  lang: 'javascript' | 'python';
   highlight: typeof python;
   placeholder?: string | undefined;
   value: string;
