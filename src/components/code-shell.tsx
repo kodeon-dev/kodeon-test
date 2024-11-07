@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Play, Square } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   Menubar,
@@ -13,7 +16,6 @@ import {
   MenubarSubTrigger,
   MenubarSubContent,
 } from '@/components/ui/menubar';
-import { Play, Square } from 'lucide-react';
 
 import ClientWorker from '@/lib/client';
 import type PythonWorker from '@/web-workers/python?worker';
@@ -31,6 +33,8 @@ export interface CodeShellProps {
 }
 
 export function CodeShell(props: CodeShellProps) {
+  const navigate = useNavigate();
+
   const [code, setCode] = useCode(props.localStorageKey);
   const [runId, setRunId] = useState<string>();
   const [output, setOutput] = useState<RunCodeOutput[]>([]);
@@ -197,11 +201,11 @@ export function CodeShell(props: CodeShellProps) {
               <MenubarMenu>
                 <MenubarTrigger>Languages</MenubarTrigger>
                 <MenubarContent>
-                  <MenubarItem>
+                  <MenubarItem onClick={() => navigate('/javascript')}>
                     <img className="h-4 w-4 me-2" src="/file_type_js_official.svg" />
                     Javascript
                   </MenubarItem>
-                  <MenubarItem>
+                  <MenubarItem onClick={() => navigate('/python')}>
                     <img className="h-4 w-4 me-2" src="/file_type_python.svg" />
                     Python
                   </MenubarItem>
