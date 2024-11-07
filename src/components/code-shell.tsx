@@ -10,11 +10,11 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
+  // MenubarSeparator,
   MenubarTrigger,
-  MenubarSub,
-  MenubarSubTrigger,
-  MenubarSubContent,
+  // MenubarSub,
+  // MenubarSubTrigger,
+  // MenubarSubContent,
 } from '@/components/ui/menubar';
 
 import ClientWorker from '@/lib/client';
@@ -137,7 +137,7 @@ export function CodeShell(props: CodeShellProps) {
       <Menubar className="px-2 py-6 border-b bg-gray-200 dark:bg-gray-700">
         <div className="w-full flex items-center">
           <div className="flex-1 flex flex-row">
-            <Menubar>
+            {/* <Menubar>
               <MenubarMenu>
                 <MenubarTrigger>Menu</MenubarTrigger>
                 <MenubarContent>
@@ -156,7 +156,7 @@ export function CodeShell(props: CodeShellProps) {
                   <MenubarItem>Print</MenubarItem>
                 </MenubarContent>
               </MenubarMenu>
-            </Menubar>
+            </Menubar> */}
           </div>
           <div className="flex-1 flex justify-center">
             {runId ? (
