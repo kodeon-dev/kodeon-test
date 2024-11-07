@@ -2,6 +2,7 @@ import 'ses';
 import format from 'format-util';
 
 import { readMessage } from '@/lib/service-messages';
+import { cleanErrorStack } from '@/lib/worker-utils/javascript';
 import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/client';
 
 declare const self: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -21,7 +22,8 @@ function toMessageString(message: unknown, ...args: unknown[]) {
 self.onmessage = async (event: WorkerRequestEvent) => {
   switch (event.data?.action) {
     case 'RUN': {
-      const { id, code } = event.data;
+      const { id, code, filename } = event.data;
+      // const lines = code.split('\n').length;
 
       try {
         const scope = new Compartment({
@@ -103,10 +105,13 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           status: 'CRASHED',
           err: {
             message,
-            stack: stack
-              .toString()
-              .split('\n')
-              .map((s) => s.trim()),
+            stack: cleanErrorStack(
+              filename,
+              stack
+                .toString()
+                .split('\n')
+                .map((s) => s.trim()),
+            ),
           },
         } satisfies WorkerResponseEvent['data']);
       }

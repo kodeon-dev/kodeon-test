@@ -1,6 +1,7 @@
 import { loadPyodide, type PyodideInterface } from 'pyodide';
 
 import { readMessage } from '@/lib/service-messages';
+import { cleanErrorMessage } from '@/lib/worker-utils/python';
 import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/client';
 
 declare const self: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -40,7 +41,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           pyodide = self.pyodide ?? (await createPyodideWorker());
         }
 
-        const script = ['from js import prompt as input;', code];
+        // const script = ['from js import prompt as input;', code];
 
         pyodide.registerJsModule('js', {
           prompt(prompt: string) {
@@ -73,6 +74,10 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           },
         });
 
+        pyodide.runPython('from js import prompt as input', {
+          filename: '_prepare.py',
+        });
+
         self.postMessage({
           id,
           action: 'STATUS',
@@ -100,7 +105,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           action: 'STATUS',
           status: 'RUNNING',
         } as WorkerResponseEvent['data']);
-        const result = await pyodide.runPythonAsync(script.join(''), {
+        const result = await pyodide.runPythonAsync(code, {
           filename,
         });
 
@@ -113,19 +118,24 @@ self.onmessage = async (event: WorkerRequestEvent) => {
       } catch (err) {
         console.error(err);
 
+        const { message } = err as unknown as { message: string };
+
         self.postMessage({
           id,
           action: 'STATUS',
           status: 'CRASHED',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: (err as any).message ?? `${err}`,
+          data: cleanErrorMessage(message),
         } as WorkerResponseEvent['data']);
       } finally {
         if (pyodide) {
-          pyodide.runPython('import sys; del sys.modules["js"];', {
-            filename: '_cleanup.py',
-          });
-          pyodide.unregisterJsModule('js');
+          try {
+            pyodide.runPython('import sys; del sys.modules["js"];', {
+              filename: '_cleanup.py',
+            });
+            pyodide.unregisterJsModule('js');
+          } catch (err) {
+            console.error(err);
+          }
         }
       }
       break;
