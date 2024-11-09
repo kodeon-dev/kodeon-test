@@ -28,6 +28,19 @@ describe('#cleanErrorStack', () => {
       ],
       ['at (main.js:1:9)'],
     ],
+    [
+      // Deployed
+      [
+        'TypeError: console.ff is not a function',
+        'at Object.eval (eval at <anonymous> (eval at ea (https://app.kodeon.dev/assets/javascript-DCDcdJwS.js:7:1910)), <anonymous>:1:9)',
+        'at Object.eval (eval at ea (https://app.kodeon.dev/assets/javascript-DCDcdJwS.js:7:1910), <anonymous>:12:22)',
+        'at safeEvaluate (https://app.kodeon.dev/assets/javascript-DCDcdJwS.js:22:403)',
+        'at ln (https://app.kodeon.dev/assets/javascript-DCDcdJwS.js:27:9173)',
+        'at s.evaluate (https://app.kodeon.dev/assets/javascript-DCDcdJwS.js:27:14063)',
+        'at self.onmessage (https://app.kodeon.dev/assets/javascript-DCDcdJwS.js:33:6819)',
+      ],
+      ['at (main.js:1:9)'],
+    ],
   ];
 
   test.each(cases)('it should transform an error stack (%#)', (input, expected) => {

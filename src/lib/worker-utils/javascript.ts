@@ -2,8 +2,6 @@
 const ERR_REGEX = /eval at <anonymous> \(eval at ([A-z]+) \(([^\)]+)\)\), /g;
 
 export function cleanErrorStack(filename: string, stack: string[]) {
-  console.log('ERROR', stack);
-
   return stack.reduce((list, line) => {
     if (ERR_REGEX.test(line)) {
       const transformed = line
