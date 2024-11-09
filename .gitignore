@@ -1,4 +1,5 @@
 cdk.out/
+coverage/
 dist/
 dist-ssr/
 logs/
