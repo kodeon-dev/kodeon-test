@@ -119,16 +119,32 @@ export function CodeEditor(props: CodeEditorProps) {
 
               case 'STDOUT': {
                 const { msg } = line;
-                return <code key={i}>{msg}</code>;
+                if (msg === '') {
+                  return (
+                    <code key={i}>
+                      <br />
+                    </code>
+                  );
+                } else {
+                  return <code key={i}>{msg}</code>;
+                }
               }
 
               case 'STDERR': {
                 const { msg } = line;
-                return (
-                  <code className="text-red-700" key={i}>
-                    {msg}
-                  </code>
-                );
+                if (msg === '') {
+                  return (
+                    <code key={i}>
+                      <br />
+                    </code>
+                  );
+                } else {
+                  return (
+                    <code className="text-red-700" key={i}>
+                      {msg}
+                    </code>
+                  );
+                }
               }
             }
           })}
