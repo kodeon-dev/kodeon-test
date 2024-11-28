@@ -1,13 +1,14 @@
 import assert from 'http-assert-plus';
+import { makeAtomicsChannel, writeMessage } from 'sync-message';
 
-import { writeMessage } from '@/lib/service-messages';
+// import { writeMessage } from '@/lib/service-messages';
 
 export type EventStatus = 'STARTED' | 'DEPENDENCIES' | 'RUNNING' | 'COMPLETED' | 'CRASHED';
 
 export interface WorkerRequestEvent {
   data?:
     | { action: 'PREPARE' }
-    | { id: string; action: 'RUN'; filename: string; code: string }
+    | { id: string; action: 'RUN'; channel: ReturnType<typeof makeAtomicsChannel>; filename: string; code: string }
     | { id: string; action: 'STDIN'; input: string }
     | { action: 'TEARDOWN' }
     | undefined;
@@ -34,12 +35,14 @@ interface IWorker {
 export default class ClientWorker {
   private WorkerClass: IWorker;
   private worker: Worker | undefined;
+  private channel: ReturnType<typeof makeAtomicsChannel>;
 
   private lock: Promise<void> | undefined;
 
   constructor(WorkerClass: IWorker) {
     this.WorkerClass = WorkerClass;
     this.worker = undefined;
+    this.channel = makeAtomicsChannel();
   }
 
   setup() {
@@ -104,10 +107,10 @@ export default class ClientWorker {
 
             if (typeof callbacks?.onStdin === 'function') {
               return callbacks.onStdin(prompt, (input: string) => {
-                writeMessage(id, input).catch((err) => console.error('writeMessage', err));
+                writeMessage(this.channel, input, id);
               });
             } else {
-              writeMessage(id, '').catch((err) => console.error('writeMessage', err));
+              writeMessage(this.channel, '', id);
               return;
             }
           }
@@ -127,6 +130,7 @@ export default class ClientWorker {
       this.worker.postMessage({
         id,
         action: 'RUN',
+        channel: this.channel,
         filename,
         code,
       } satisfies WorkerRequestEvent['data']);
