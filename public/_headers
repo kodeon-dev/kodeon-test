@@ -1,4 +1,10 @@
 # Set headers for Cloudflare
+
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  X-Powered-By: Kodeon (https://github.com/kodeon-dev)
+
 /**/*
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
