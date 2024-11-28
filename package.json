@@ -18,6 +18,7 @@
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-php": "^6.0.1",
     "@codemirror/lang-python": "^6.1.6",
+    "@lezer/highlight": "^1.2.1",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-menubar": "^1.1.2",
     "@radix-ui/react-select": "^2.1.1",
