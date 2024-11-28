@@ -1,7 +1,8 @@
 import 'ses';
 import format from 'format-util';
+import { readMessage } from 'sync-message';
 
-import { readMessage } from '@/lib/service-messages';
+// import { readMessage } from '@/lib/service-messages';
 import { cleanErrorStack } from '@/lib/worker-utils/javascript';
 import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/client';
 
@@ -22,7 +23,7 @@ function toMessageString(message: unknown, ...args: unknown[]) {
 self.onmessage = async (event: WorkerRequestEvent) => {
   switch (event.data?.action) {
     case 'RUN': {
-      const { id, code, filename } = event.data;
+      const { id, code, filename, channel } = event.data;
       // const lines = code.split('\n').length;
 
       try {
@@ -65,7 +66,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
                 prompt,
               } as WorkerResponseEvent['data']);
               // BLOCKED until this function resolves
-              return readMessage(id, '100ms');
+              return readMessage(channel, id);
             },
           },
           __options__: true, // temporary migration affordance

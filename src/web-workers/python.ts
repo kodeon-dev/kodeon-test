@@ -31,16 +31,17 @@ self.onmessage = async (event: WorkerRequestEvent) => {
       let pyodide!: PyodideInterface;
 
       try {
+        if (self.pyodide) {
+          pyodide = self.pyodide;
+        } else {
+          pyodide = self.pyodide = await createPyodideWorker();
+        }
+
         self.postMessage({
           id,
           action: 'STATUS',
           status: 'STARTED',
         } as WorkerResponseEvent['data']);
-        if (self.pyodide) {
-          pyodide = self.pyodide;
-        } else {
-          pyodide = self.pyodide ?? (await createPyodideWorker());
-        }
 
         // const script = ['from js import prompt as input;', code];
 
