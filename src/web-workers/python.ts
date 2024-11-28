@@ -52,7 +52,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
               prompt,
             } as WorkerResponseEvent['data']);
             // BLOCKED until this function resolves
-            return readMessage(channel, id, { timeout: 100 });
+            return readMessage(channel, id);
           },
         });
 
