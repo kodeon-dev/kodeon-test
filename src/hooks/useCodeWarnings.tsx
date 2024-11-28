@@ -12,23 +12,23 @@ export function useCodeWarnings(config: ReturnType<typeof getConfig>) {
     );
   }
 
-  if (config.serviceWorkers.supported === false) {
-    warnings.push(
-      <code key="service-workers-not-supported" className="text-yellow-500">
-        Service workers are not supported - you will not be able to enter input into your code.
-      </code>,
-    );
-  } else if (config.serviceWorkers.enabled === false) {
-    warnings.push(
-      <code key="service-workers-not-enabled" className="text-yellow-500">
-        Service workers are not enabled{' - '}
-        <a className="underline decoration-dashed" href="#" onClick={() => window.location.reload()}>
-          refresh your page
-        </a>{' '}
-        to restart them.
-      </code>,
-    );
-  }
+  // if (config.serviceWorkers.supported === false) {
+  //   warnings.push(
+  //     <code key="service-workers-not-supported" className="text-yellow-500">
+  //       Service workers are not supported - you will not be able to enter input into your code.
+  //     </code>,
+  //   );
+  // } else if (config.serviceWorkers.enabled === false) {
+  //   warnings.push(
+  //     <code key="service-workers-not-enabled" className="text-yellow-500">
+  //       Service workers are not enabled{' - '}
+  //       <a className="underline decoration-dashed" href="#" onClick={() => window.location.reload()}>
+  //         refresh your page
+  //       </a>{' '}
+  //       to restart them.
+  //     </code>,
+  //   );
+  // }
 
   return warnings;
 }

@@ -1,6 +1,7 @@
 import { loadPyodide, type PyodideInterface } from 'pyodide';
+import { readMessage } from 'sync-message';
 
-import { readMessage } from '@/lib/service-messages';
+// import { readMessage } from '@/lib/service-messages';
 import { cleanErrorMessage } from '@/lib/worker-utils/python';
 import type { WorkerRequestEvent, WorkerResponseEvent } from '@/lib/client';
 
@@ -25,21 +26,22 @@ self.onmessage = async (event: WorkerRequestEvent) => {
     }
 
     case 'RUN': {
-      const { id, code, filename } = event.data;
+      const { id, code, filename, channel } = event.data;
 
       let pyodide!: PyodideInterface;
 
       try {
+        if (self.pyodide) {
+          pyodide = self.pyodide;
+        } else {
+          pyodide = self.pyodide = await createPyodideWorker();
+        }
+
         self.postMessage({
           id,
           action: 'STATUS',
           status: 'STARTED',
         } as WorkerResponseEvent['data']);
-        if (self.pyodide) {
-          pyodide = self.pyodide;
-        } else {
-          pyodide = self.pyodide ?? (await createPyodideWorker());
-        }
 
         // const script = ['from js import prompt as input;', code];
 
@@ -51,7 +53,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
               prompt,
             } as WorkerResponseEvent['data']);
             // BLOCKED until this function resolves
-            return readMessage(id, '100ms');
+            return readMessage(channel, id);
           },
         });
 
