@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import CodeMirror, { EditorView, BasicSetupOptions } from '@uiw/react-codemirror';
-import { githubDarkInit } from '@uiw/codemirror-theme-github';
 import { tokyoNightStormInit } from '@uiw/codemirror-theme-tokyo-night-storm';
 import type { python } from '@codemirror/lang-python';
 import { tags as t } from '@lezer/highlight';
@@ -58,14 +57,6 @@ const options: BasicSetupOptions = {
   completionKeymap: true,
   lintKeymap: true,
 };
-
-// const theme = githubDarkInit({
-//   settings: {
-//     gutterBackground: '#0d1116',
-//     selection: '#003d73',
-//     lineHighlight: 'rgb(34,34,45, 0.2)',
-//   },
-// });
 
 const theme = tokyoNightStormInit({
   settings: {
