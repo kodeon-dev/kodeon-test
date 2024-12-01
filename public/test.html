@@ -1,0 +1,65 @@
+<!-- Note: this example requires setting the COEP headers to work, see README.md -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wasmer JavaScript SDK</title>
+    <script type="module">
+      import {
+        init,
+        Wasmer,
+      } from "https://unpkg.com/@wasmer/sdk@0.8.0-beta.1/dist/index.mjs";
+
+      (async function run() {
+
+        const status = document.getElementById("status");
+        const stdout = document.getElementById("stdout");
+
+        status.innerHTML = "Initializing...";
+        await init();
+
+        const pkgName = 'python/python';
+        const pkgArgs = ["-c", "print('Hello, world')"]
+
+        status.innerHTML = `Fetching python...`;
+        const lang = await Wasmer.fromRegistry(pkgName);
+
+        status.innerHTML = `Running...`;
+
+        let instance = await lang.entrypoint.run({ args: pkgArgs });
+
+        const decode = new TextDecoder("utf-8");
+
+        instance.stdout.pipeTo(
+          new WritableStream({
+            write(data) {
+              stdout.innerText += decode.decode(data) + "\n"
+            },
+          }),
+        );
+        instance.stderr.pipeTo(
+          new WritableStream({
+            write(data) {
+              stdout.innerText += decode.decode(data) + "\n"
+            },
+          }),
+        );
+
+        status.innerHTML = `Finishing...`;
+        const output = await instance.wait();
+
+        if (!output.ok) {
+          throw new Error(`${pkgName} failed with exit code ${output.code}: ${output.stderr}`);
+        }
+
+        status.innerHTML = `Done`;
+      })()
+    </script>
+  </head>
+
+  <body>
+    <h1 id="status"></h1>
+    <pre><code id="stdout"></code></pre>
+  </body>
+</html>
