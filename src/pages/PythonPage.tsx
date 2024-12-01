@@ -2,10 +2,10 @@
 
 import { python } from '@codemirror/lang-python';
 
+import ClientWorker from '@/lib/client';
 import PythonWorker from '@/web-workers/python?worker';
-import { localStorageKeys } from '@/constants';
-
 import { CodeShell } from '@/components/code-shell';
+import { localStorageKeys } from '@/constants';
 
 const placeholder = `
 # Welcome to Kodeon!
@@ -38,7 +38,7 @@ for i in range(num):
 export default function PythonPage() {
   return CodeShell({
     lang: 'python',
-    workerClass: PythonWorker,
+    createClient: () => new ClientWorker(PythonWorker),
     highlight: python,
     localStorageKey: localStorageKeys.code.pythonLastEdited,
     filename: 'main.py',

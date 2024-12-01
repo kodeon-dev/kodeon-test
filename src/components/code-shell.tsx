@@ -17,14 +17,13 @@ import {
   // MenubarSubContent,
 } from '@/components/ui/menubar';
 
-import ClientWorker from '@/lib/client';
-import type PythonWorker from '@/web-workers/python?worker';
 import { CodeEditor, type CodeEditorProps, type RunCodeOutput } from '@/components/editor';
 import { useCode } from '@/hooks/useCode';
+import type ClientWorker from '@/lib/client';
 
 export interface CodeShellProps {
   localStorageKey: string;
-  workerClass: typeof PythonWorker;
+  createClient: () => ClientWorker;
   lang: CodeEditorProps['lang'];
   filename: CodeEditorProps['filename'];
   placeholder?: CodeEditorProps['placeholder'];
@@ -39,7 +38,7 @@ export function CodeShell(props: CodeShellProps) {
   const [runId, setRunId] = useState<string>();
   const [output, setOutput] = useState<RunCodeOutput[]>([]);
 
-  const client = useMemo(() => new ClientWorker(props.workerClass), [props.workerClass]);
+  const client = useMemo(() => props.createClient(), [props]);
 
   useEffect(() => {
     client.setup();

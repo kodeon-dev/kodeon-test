@@ -2,10 +2,10 @@
 
 import { javascript } from '@codemirror/lang-javascript';
 
+import ClientWorker from '@/lib/client';
 import JavascriptWorker from '@/web-workers/javascript?worker';
-import { localStorageKeys } from '@/constants';
-
 import { CodeShell } from '@/components/code-shell';
+import { localStorageKeys } from '@/constants';
 
 const placeholder = `
 // Welcome to Kodeon!
@@ -26,7 +26,7 @@ console.log(a)
 export default function PythonPage() {
   return CodeShell({
     lang: 'javascript',
-    workerClass: JavascriptWorker,
+    createClient: () => new ClientWorker(JavascriptWorker),
     highlight: javascript,
     localStorageKey: localStorageKeys.code.javascriptLastEdited,
     filename: 'main.js',
