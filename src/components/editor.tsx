@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import CodeMirror, { EditorView, BasicSetupOptions } from '@uiw/react-codemirror';
 import { tokyoNightStormInit } from '@uiw/codemirror-theme-tokyo-night-storm';
+import { tags as t } from '@lezer/highlight';
 import type { python } from '@codemirror/lang-python';
 
 import { getConfig } from '@/lib/config';
@@ -61,7 +62,13 @@ const theme = tokyoNightStormInit({
   settings: {
     background: '#1f2937',
     gutterBackground: '#1f2937',
+    selection: '#004787',
+    lineHighlight: 'rgb(34,34,45, 0.2)',
   },
+  styles: [
+    // { tag: t.lineComment, color: '#fff' },
+    { tag: t.variableName, color: '#fff' },
+  ],
 });
 
 export function CodeEditor(props: CodeEditorProps) {
