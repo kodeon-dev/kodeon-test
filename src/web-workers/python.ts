@@ -34,7 +34,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           id,
           action: 'STATUS',
           status: 'STARTED',
-        } as WorkerResponseEvent['data']);
+        } satisfies WorkerResponseEvent['data']);
         if (self.pyodide) {
           pyodide = self.pyodide;
         } else {
@@ -49,7 +49,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
               id,
               action: 'STDIN',
               prompt,
-            } as WorkerResponseEvent['data']);
+            } satisfies WorkerResponseEvent['data']);
             // BLOCKED until this function resolves
             return readMessage(id, '100ms');
           },
@@ -61,7 +61,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
               id,
               action: 'STDOUT',
               data,
-            } as WorkerResponseEvent['data']);
+            } satisfies WorkerResponseEvent['data']);
           },
         });
         pyodide.setStderr({
@@ -70,7 +70,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
               id,
               action: 'STDERR',
               data,
-            } as WorkerResponseEvent['data']);
+            } satisfies WorkerResponseEvent['data']);
           },
         });
 
@@ -82,21 +82,21 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           id,
           action: 'STATUS',
           status: 'DEPENDENCIES',
-        } as WorkerResponseEvent['data']);
+        } satisfies WorkerResponseEvent['data']);
         await pyodide.loadPackagesFromImports(code, {
           messageCallback(data: string) {
             self.postMessage({
               id,
               action: 'STDOUT',
               data,
-            } as WorkerResponseEvent['data']);
+            } satisfies WorkerResponseEvent['data']);
           },
           errorCallback(data: string) {
             self.postMessage({
               id,
               action: 'STDOUT',
               data,
-            } as WorkerResponseEvent['data']);
+            } satisfies WorkerResponseEvent['data']);
           },
         });
 
@@ -104,7 +104,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           id,
           action: 'STATUS',
           status: 'RUNNING',
-        } as WorkerResponseEvent['data']);
+        } satisfies WorkerResponseEvent['data']);
         const result = await pyodide.runPythonAsync(code, {
           filename,
         });
@@ -114,7 +114,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           action: 'STATUS',
           status: 'COMPLETED',
           data: result,
-        } as WorkerResponseEvent['data']);
+        } satisfies WorkerResponseEvent['data']);
       } catch (err) {
         console.error(err);
 
@@ -125,7 +125,7 @@ self.onmessage = async (event: WorkerRequestEvent) => {
           action: 'STATUS',
           status: 'CRASHED',
           data: cleanErrorMessage(message),
-        } as WorkerResponseEvent['data']);
+        } satisfies WorkerResponseEvent['data']);
       } finally {
         if (pyodide) {
           try {
