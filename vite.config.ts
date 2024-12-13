@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { copyFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { defineConfig, type PluginOption } from 'vite';
@@ -25,6 +26,14 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  resolve: {
+    alias: {
+      '@': join(__dirname, './src'),
+    },
+  },
+  build: {
+    sourcemap: true,
+  },
   preview: {
     port: 3000,
   },
@@ -34,7 +43,6 @@ export default defineConfig({
   plugins: [
     react(),
     pyodide(),
-
     // @link https://vite-pwa-org.netlify.app/guide/service-worker-without-pwa-capabilities.html
     VitePWA({
       srcDir: 'src',
@@ -50,7 +58,6 @@ export default defineConfig({
         enabled: true,
       },
     }),
-
     viteStaticCopy({
       targets: [
         {
@@ -60,17 +67,16 @@ export default defineConfig({
         },
       ],
     }),
+    sentryVitePlugin({
+      org: 'kodeon-dev',
+      project: 'kodeon-test',
+    }),
   ],
   worker: {
     rollupOptions: {
       output: {
         inlineDynamicImports: true,
       },
-    },
-  },
-  resolve: {
-    alias: {
-      '@': join(__dirname, './src'),
     },
   },
 });
