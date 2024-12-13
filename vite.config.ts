@@ -70,6 +70,9 @@ export default defineConfig({
     sentryVitePlugin({
       org: 'kodeon-dev',
       project: 'kodeon-test',
+      sourcemaps: {
+        filesToDeleteAfterUpload: '**/*.js.map',
+      },
     }),
   ],
   worker: {
