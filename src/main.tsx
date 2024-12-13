@@ -1,8 +1,13 @@
+import * as Sentry from '@sentry/react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App.tsx';
 import './styles/core.css';
+
+Sentry.init({
+  dsn: 'https://dc65ad6d955dadaa35bffda15afd31e0@o4508089398132736.ingest.de.sentry.io/4508462814134352',
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
